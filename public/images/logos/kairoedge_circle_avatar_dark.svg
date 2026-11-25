@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <!-- Radiant Cyan Glow Filter -->
+    <filter id="darkGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="8" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <!-- Electric Cyan Orbital Gradient -->
+    <linearGradient id="darkOrbitCyan" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0066FF" />
+      <stop offset="45%" stop-color="#00D2FF" />
+      <stop offset="100%" stop-color="#38E5FF" />
+    </linearGradient>
+
+    <!-- Metallic Gold Arrow Gradient -->
+    <linearGradient id="darkGoldArrow" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#C59B27" />
+      <stop offset="40%" stop-color="#E5A93C" />
+      <stop offset="80%" stop-color="#FCD34D" />
+      <stop offset="100%" stop-color="#FEF08A" />
+    </linearGradient>
+
+    <!-- Titanium / Ice-White 'K' Body Gradient -->
+    <linearGradient id="titaniumK" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#CBD5E1" />
+    </linearGradient>
+
+    <!-- Midnight Navy Background -->
+    <radialGradient id="bgDarkNavy" cx="50%" cy="45%" r="65%">
+      <stop offset="0%" stop-color="#0C203F" />
+      <stop offset="70%" stop-color="#060F1E" />
+      <stop offset="100%" stop-color="#020712" />
+    </radialGradient>
+  </defs>
+
+  <!-- Circular Container with Glowing Cyan Rim -->
+  <circle cx="256" cy="256" r="250" fill="url(#bgDarkNavy)" stroke="rgba(0, 210, 255, 0.45)" stroke-width="4" />
+  <circle cx="256" cy="256" r="236" fill="none" stroke="rgba(56, 189, 248, 0.15)" stroke-width="2" />
+
+  <!-- EMBLEM: Centered in 512x512 -->
+  <g transform="translate(256, 256) scale(1.15)">
+    <!-- 1. BACK ORBITAL SWOOSH -->
+    <path d="M -90 40 C -125 10, -110 -40, -45 -65 C 20 -90, 85 -75, 120 -35"
+          fill="none" 
+          stroke="url(#darkOrbitCyan)" 
+          stroke-width="14" 
+          stroke-linecap="round"
+          opacity="0.85" />
+
+    <!-- 2. STYLIZED 'K': Vertical Spine -->
+    <rect x="-64" y="-105" width="36" height="210" rx="8" fill="url(#titaniumK)" />
+
+    <!-- 3. STYLIZED 'K': Top Diagonal Arm -->
+    <path d="M -28 -15 L 42 -105 L 82 -105 L -10 10 Z" fill="url(#titaniumK)" />
+
+    <!-- 4. METALLIC GOLD VELOCITY ARROW (Swooping up from bottom-right of K) -->
+    <path d="M -24 0 C 10 35, 45 68, 75 70 C 105 72, 118 42, 125 15"
+          fill="none" 
+          stroke="url(#darkGoldArrow)" 
+          stroke-width="26" 
+          stroke-linecap="round" />
+    
+    <!-- Razor-sharp Gold Arrowhead -->
+    <polygon points="132, -18 155, 26 114, 20" fill="url(#darkGoldArrow)" filter="url(#darkGlow)" />
+
+    <!-- 5. FRONT ORBITAL SWOOSH -->
+    <path d="M -115 25 C -75 75, 10 100, 75 80 C 110 70, 128 50, 136 28"
+          fill="none" 
+          stroke="url(#darkOrbitCyan)" 
+          stroke-width="14" 
+          stroke-linecap="round" 
+          filter="url(#darkGlow)" />
+  </g>
+</svg>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="600" viewBox="0 0 960 600" role="img" aria-label="JOB">
+  <defs>
+    <linearGradient id="bgprojectsorbitfieldsvg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0c1522"/>
+      <stop offset="1" stop-color="#163a66"/>
+    </linearGradient>
+  </defs>
+  <rect width="960" height="600" fill="url(#bgprojectsorbitfieldsvg)"/>
+  <g stroke="#7eb6ff" stroke-opacity="0.12"><line x1="0" y1="0" x2="0" y2="600"/><line x1="80" y1="0" x2="80" y2="600"/><line x1="160" y1="0" x2="160" y2="600"/><line x1="240" y1="0" x2="240" y2="600"/><line x1="320" y1="0" x2="320" y2="600"/><line x1="400" y1="0" x2="400" y2="600"/><line x1="480" y1="0" x2="480" y2="600"/><line x1="560" y1="0" x2="560" y2="600"/><line x1="640" y1="0" x2="640" y2="600"/><line x1="720" y1="0" x2="720" y2="600"/><line x1="800" y1="0" x2="800" y2="600"/><line x1="880" y1="0" x2="880" y2="600"/></g>
+  <rect x="48" y="36" width="864" height="528" rx="18" fill="#0b121c" stroke="#4aa3ff" stroke-opacity="0.45"/>
+  <circle cx="78" cy="66" r="6" fill="#ff6b6b"/><circle cx="98" cy="66" r="6" fill="#ffd166"/><circle cx="118" cy="66" r="6" fill="#6ee7b7"/>
+  <text x="148" y="72" fill="#9ec4ff" font-family="Segoe UI, sans-serif" font-size="14" letter-spacing="2">JOB</text>
+  <rect x="140" y="100" width="300" height="430" rx="14" fill="#121c2b" stroke="#4aa3ff" stroke-opacity="0.55" /><text x="170" y="170" fill="#fff" font-family="Segoe UI, sans-serif" font-size="22">Job 22</text><rect x="170" y="210" width="230" height="16" rx="8" fill="#6ee7b7"/><rect x="170" y="250" width="230" height="16" rx="8" fill="#6ee7b7"/><rect x="170" y="290" width="230" height="16" rx="8" fill="#ffd166"/><rect x="170" y="380" width="230" height="80" rx="12" fill="#1d6fe0"/><text x="210" y="428" fill="#fff" font-family="Segoe UI, sans-serif" font-size="18">Sign-off</text><rect x="500" y="160" width="320" height="300" rx="14" fill="#121c2b" stroke="#4aa3ff" stroke-opacity="0.55" /><text x="530" y="240" fill="#d7e8ff" font-family="Segoe UI, sans-serif" font-size="18">Parts used</text><text x="530" y="320" fill="#fff" font-family="Segoe UI, sans-serif" font-size="40">4</text>
+</svg>

@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 200" width="100%" height="100%">
+  <defs>
+    <filter id="hGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <linearGradient id="hOrbitCyan" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0066FF" />
+      <stop offset="50%" stop-color="#00D2FF" />
+      <stop offset="100%" stop-color="#38E5FF" />
+    </linearGradient>
+
+    <linearGradient id="hGoldArrow" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#B8860B" />
+      <stop offset="35%" stop-color="#D4AF37" />
+      <stop offset="70%" stop-color="#F3C644" />
+      <stop offset="100%" stop-color="#FFDF73" />
+    </linearGradient>
+
+    <linearGradient id="hNavyK" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0F2244" />
+      <stop offset="100%" stop-color="#081426" />
+    </linearGradient>
+
+    <linearGradient id="hCyanText" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Clean Canvas -->
+  <rect width="780" height="200" rx="20" fill="#FFFFFF" stroke="rgba(0, 210, 255, 0.25)" stroke-width="1.5" />
+
+  <!-- EMBLEM (LEFT) -->
+  <g transform="translate(100, 100) scale(0.68)">
+    <!-- 1. BACK ORBITAL SWOOSH -->
+    <path d="M -90 40 C -125 10, -110 -40, -45 -65 C 20 -90, 85 -75, 120 -35"
+          fill="none" 
+          stroke="url(#hOrbitCyan)" 
+          stroke-width="13" 
+          stroke-linecap="round"
+          opacity="0.85" />
+
+    <!-- 2. STYLIZED 'K': Vertical Spine -->
+    <rect x="-62" y="-105" width="34" height="210" rx="8" fill="url(#hNavyK)" />
+
+    <!-- 3. STYLIZED 'K': Top Diagonal Arm -->
+    <path d="M -28 -15 L 42 -105 L 82 -105 L -10 10 Z" fill="url(#hNavyK)" />
+
+    <!-- 4. METALLIC GOLD VELOCITY ARROW -->
+    <path d="M -24 0 C 10 35, 45 68, 75 70 C 105 72, 118 42, 125 15"
+          fill="none" 
+          stroke="url(#hGoldArrow)" 
+          stroke-width="26" 
+          stroke-linecap="round" />
+    
+    <polygon points="132, -18 155, 26 114, 20" fill="url(#hGoldArrow)" filter="url(#hGlow)" />
+
+    <!-- 5. FRONT ORBITAL SWOOSH -->
+    <path d="M -115 25 C -75 75, 10 100, 75 80 C 110 70, 128 50, 136 28"
+          fill="none" 
+          stroke="url(#hOrbitCyan)" 
+          stroke-width="13" 
+          stroke-linecap="round" 
+          filter="url(#hGlow)" />
+  </g>
+
+  <!-- TYPOGRAPHY (RIGHT) -->
+  <g transform="translate(210, 104)">
+    <text font-family="'Bricolage Grotesque', 'Instrument Sans', sans-serif" 
+          font-size="64" 
+          font-weight="800" 
+          letter-spacing="-1.5">
+      <tspan fill="#0F2244">Kairo</tspan>
+      <tspan fill="url(#hCyanText)">Edge</tspan>
+    </text>
+
+    <text y="42" 
+          x="4"
+          font-family="'Instrument Sans', sans-serif" 
+          font-size="15.5" 
+          font-weight="700" 
+          letter-spacing="5.5" 
+          fill="#475569">
+      TECHNOLOGIES PRIVATE LIMITED
+    </text>
+
+    <line x1="4" y1="54" x2="525" y2="54" stroke="rgba(0, 180, 255, 0.4)" stroke-width="1.5" stroke-linecap="round" />
+  </g>
+</svg>

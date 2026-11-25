@@ -1,0 +1,409 @@
+/* ==========================================================================
+   KAIROEDGE TECHNOLOGIES - DESIGN TOKENS & SYSTEM STYLES
+   ========================================================================== */
+
+:root,
+html[data-theme="dark"] {
+  --bg: #070e1c;
+  --bg2: #0d1a33;
+  --ink: #EEF4FF;
+  --mut: #94A8CB;
+  --line: rgba(56, 189, 248, 0.16);
+  --blue: #0070F3;
+  --cyan: #00D2FF;
+  --sun: #00B4D8;
+  --acc: #38BDF8;
+  --card: rgba(13, 26, 51, 0.65);
+  --on-sun: #ffffff;
+  --sh: 0 8px 32px rgba(0, 102, 255, 0.15);
+  --hg: 30%;
+  --hg2: 8%;
+  --glow-blend: screen;
+
+  /* Service Accents - aligned with logo */
+  --accent-cloud: #00D2FF;
+  --accent-software: #0066FF;
+  --accent-mobile: #06B6D4;
+  --accent-ai: #6366F1;
+  --accent-security: #0EA5E9;
+  --accent-design: #38BDF8;
+
+  /* Typography */
+  --font-heading: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'Instrument Sans', sans-serif;
+
+  /* Dimensions */
+  --max-w: 1160px;
+  --pad-x: 24px;
+  --card-radius: 22px;
+  --btn-radius: 999px;
+  --section-pad: 88px;
+  --header-h: 68px;
+
+  color-scheme: dark;
+}
+
+html[data-theme="light"] {
+  --bg: #F4F8FD;
+  --bg2: #E8F2FC;
+  --ink: #07152E;
+  --mut: #475D7D;
+  --line: rgba(0, 102, 240, 0.14);
+  --blue: #0062E6;
+  --cyan: #0099FF;
+  --sun: #0070F3;
+  --acc: #0066FF;
+  --card: #ffffff;
+  --sh: 0 4px 20px -2px rgba(0, 60, 160, 0.08), 0 2px 6px rgba(0, 60, 160, 0.04);
+  --on-sun: #ffffff;
+  --hg: 14%;
+  --hg2: 22%;
+  --glow-blend: normal;
+
+  /* Service Accents */
+  --accent-cloud: #0099FF;
+  --accent-software: #0052CC;
+  --accent-mobile: #0891B2;
+  --accent-ai: #4F46E5;
+  --accent-security: #0284C7;
+  --accent-design: #0EA5E9;
+
+  color-scheme: light;
+}
+
+/* ==========================================================================
+   BASE RESETS & GLOBAL TYPOGRAPHY
+   ========================================================================== */
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 17px;
+  line-height: 1.6;
+  overflow-x: clip;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  overflow-x: clip;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-heading);
+  color: var(--ink);
+  margin: 0;
+  text-align: left;
+  line-height: 1.04;
+  letter-spacing: -0.025em;
+  overflow-wrap: anywhere;
+}
+
+h1 {
+  letter-spacing: -0.03em;
+  font-weight: 800;
+}
+
+h2 {
+  font-size: clamp(2rem, 4.6vw, 3.4rem);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+}
+
+h3 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+p {
+  margin: 0;
+  color: var(--mut);
+  text-align: left;
+  max-width: 60ch;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: inherit;
+}
+
+img, svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* Focus styles */
+:focus-visible {
+  outline: 3px solid var(--sun);
+  outline-offset: 3px;
+}
+
+/* Skip link */
+.skip-link {
+  position: absolute;
+  top: -60px;
+  left: 20px;
+  background: var(--sun);
+  color: var(--on-sun);
+  padding: 10px 20px;
+  font-weight: 700;
+  border-radius: 999px;
+  z-index: 9999;
+  transition: top 0.2s ease;
+}
+
+.skip-link:focus {
+  top: 14px;
+}
+
+/* Container */
+.container {
+  width: 100%;
+  max-width: var(--max-w);
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: var(--pad-x);
+  padding-right: var(--pad-x);
+}
+
+/* Sections */
+.section {
+  padding-top: var(--section-pad);
+  padding-bottom: var(--section-pad);
+  position: relative;
+}
+
+.section + .section:not(.section-alt) {
+  padding-top: 0;
+}
+
+.section-alt {
+  background-color: var(--bg2);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+/* ==========================================================================
+   BUTTONS & CHIPS
+   ========================================================================== */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 12px 28px;
+  border-radius: var(--btn-radius);
+  font-family: var(--font-body);
+  font-size: 15.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, background-color 0.2s ease, border-color 0.2s ease;
+  text-decoration: none;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.btn-primary {
+  background-color: var(--sun);
+  color: var(--on-sun);
+  box-shadow: 0 4px 18px rgba(255, 181, 71, 0.25);
+  font-weight: 700;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(255, 181, 71, 0.38);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--ink);
+  border: 1px solid var(--line);
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: var(--mut);
+  transform: translateY(-2px);
+}
+
+html[data-theme="light"] .btn-secondary:hover {
+  background: rgba(16, 22, 54, 0.04);
+}
+
+/* Pills and chips */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  border-radius: 999px;
+  font-size: 13.5px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--line);
+  color: var(--mut);
+  white-space: nowrap;
+}
+
+html[data-theme="light"] .chip {
+  background: rgba(16, 22, 54, 0.04);
+}
+
+.chip.active, .chip:hover {
+  color: var(--ink);
+  border-color: var(--mut);
+}
+
+/* ==========================================================================
+   CARDS WITH MASK-COMPOSITE GRADIENT BORDER & 3D TILT
+   ========================================================================== */
+
+.card {
+  --ac: var(--blue);
+  --mx: 50%;
+  --my: 50%;
+  position: relative;
+  background-color: var(--card);
+  border-radius: var(--card-radius);
+  padding: 36px 32px;
+  box-shadow: var(--sh);
+  border: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.28s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+  overflow: hidden;
+}
+
+/* Gradient border on hover using mask-composite trick */
+.card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+  padding: 1.5px; /* Border thickness */
+  background: linear-gradient(135deg, var(--ac) 0%, transparent 60%, var(--sun) 100%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: 2;
+}
+
+/* Cursor spotlight inside card */
+.card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: var(--card-radius);
+  background: radial-gradient(420px circle at var(--mx) var(--my), rgba(255, 255, 255, 0.065), transparent 70%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+  z-index: 1;
+}
+
+html[data-theme="light"] .card::after {
+  background: radial-gradient(420px circle at var(--mx) var(--my), rgba(59, 91, 255, 0.05), transparent 70%);
+}
+
+.card:hover::before {
+  opacity: 1;
+}
+
+.card:hover::after {
+  opacity: 1;
+}
+
+.card:hover {
+  box-shadow: 0 26px 54px -30px var(--ac);
+}
+
+/* ==========================================================================
+   ICON TILE
+   ========================================================================== */
+
+.icon-tile {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  background: color-mix(in srgb, var(--ac, var(--blue)) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ac, var(--blue)) 30%, transparent);
+  color: var(--ac, var(--blue));
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.25s ease, color 0.25s ease;
+}
+
+.card:hover .icon-tile {
+  background-color: var(--ac, var(--blue));
+  color: #ffffff;
+  transform: rotate(-6deg);
+}
+
+/* ==========================================================================
+   REVEAL ON SCROLL ANIMATION
+   ========================================================================== */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1), transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+
+.reveal.is-revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  .card:hover {
+    transform: none !important;
+  }
+}

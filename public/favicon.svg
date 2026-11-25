@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#07152b" />
+      <stop offset="100%" stop-color="#020a17" />
+    </linearGradient>
+    <linearGradient id="kGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="50%" stop-color="#0066FF" />
+      <stop offset="100%" stop-color="#0044CC" />
+    </linearGradient>
+    <linearGradient id="swooshGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00E5FF" />
+      <stop offset="100%" stop-color="#0070F3" />
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="16" fill="url(#bgGrad)" />
+  <circle cx="32" cy="32" r="30" fill="none" stroke="#0070F3" stroke-width="1.5" stroke-opacity="0.4" />
+  <!-- Orbital Swoosh -->
+  <path d="M 12 36 C 14 46, 26 50, 36 48 C 48 45, 54 34, 52 22 C 50 14, 42 10, 38 12" 
+        fill="none" stroke="url(#swooshGrad)" stroke-width="3" stroke-linecap="round" />
+  <!-- Stylized K -->
+  <path d="M 22 14 L 28 14 L 28 50 L 22 50 Z" fill="url(#kGrad)" />
+  <path d="M 28 32 L 42 15 L 49 15 L 34 33 L 49 50 L 42 50 L 28 34 Z" fill="url(#kGrad)" />
+  <!-- Cloud Accent inside K -->
+  <path d="M 33 46 C 33 43, 36 41, 38 41 C 39 39, 42 39, 43 41 C 45 41, 46 43, 46 45 C 47 45, 48 46, 48 47 C 48 48, 47 49, 46 49 L 34 49 C 33 49, 33 48, 33 46 Z" 
+        fill="#FFFFFF" opacity="0.9" />
+</svg>

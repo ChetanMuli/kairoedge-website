@@ -1,0 +1,94 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 200" width="100%" height="100%">
+  <defs>
+    <!-- Cyan neon glow -->
+    <filter id="hOrbGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="6" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+
+    <linearGradient id="hOrbGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0066FF" />
+      <stop offset="50%" stop-color="#00D2FF" />
+      <stop offset="100%" stop-color="#38E5FF" />
+    </linearGradient>
+
+    <linearGradient id="hKBody" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0B1B36" />
+      <stop offset="100%" stop-color="#040D1A" />
+    </linearGradient>
+
+    <linearGradient id="hKLeg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0066FF" />
+      <stop offset="100%" stop-color="#00D2FF" />
+    </linearGradient>
+
+    <linearGradient id="hEdgeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00D2FF" />
+      <stop offset="100%" stop-color="#38BDF8" />
+    </linearGradient>
+  </defs>
+
+  <!-- Clean card background -->
+  <rect width="740" height="200" rx="20" fill="#FFFFFF" stroke="rgba(0, 180, 255, 0.25)" stroke-width="1.5" />
+
+  <!-- ICON (LEFT) -->
+  <g transform="translate(100, 100) scale(0.65)">
+    <!-- Back Orbital Arc -->
+    <path d="M -90 40 C -125 10, -110 -40, -45 -65 C 20 -90, 85 -75, 120 -35"
+          fill="none" 
+          stroke="url(#hOrbGrad)" 
+          stroke-width="13" 
+          stroke-linecap="round"
+          opacity="0.8" />
+
+    <!-- Stylized K: Vertical Spine -->
+    <rect x="-62" y="-105" width="34" height="210" rx="8" fill="url(#hKBody)" />
+
+    <!-- Stylized K: Top Diagonal Arm -->
+    <path d="M -28 -15 L 42 -105 L 82 -105 L -10 10 Z" fill="url(#hKBody)" />
+
+    <!-- Stylized K: Bottom Diagonal Branch Sweeping Upward into Velocity Arrow -->
+    <path d="M -24 0 C 10 35, 45 68, 75 70 C 105 72, 118 42, 125 15"
+          fill="none" 
+          stroke="url(#hKLeg)" 
+          stroke-width="28" 
+          stroke-linecap="round" />
+    
+    <!-- Razor-sharp Arrowhead at (132, 5) -->
+    <polygon points="132, -15 152, 28 116, 20" fill="#00D2FF" filter="url(#hOrbGlow)" />
+
+    <!-- Front Orbital Arc -->
+    <path d="M -115 25 C -75 75, 10 100, 75 80 C 110 70, 128 50, 136 28"
+          fill="none" 
+          stroke="url(#hOrbGrad)" 
+          stroke-width="13" 
+          stroke-linecap="round" 
+          filter="url(#hOrbGlow)" />
+  </g>
+
+  <!-- TYPOGRAPHY (RIGHT) -->
+  <g transform="translate(205, 102)">
+    <text font-family="'Bricolage Grotesque', 'Instrument Sans', sans-serif" 
+          font-size="62" 
+          font-weight="800" 
+          letter-spacing="-1.5">
+      <tspan fill="#0B1B36">Kairo</tspan>
+      <tspan fill="url(#hEdgeGrad)">Edge</tspan>
+    </text>
+
+    <text y="42" 
+          x="4"
+          font-family="'Instrument Sans', sans-serif" 
+          font-size="15.5" 
+          font-weight="700" 
+          letter-spacing="5.5" 
+          fill="#475569">
+      TECHNOLOGIES PRIVATE LIMITED
+    </text>
+
+    <line x1="4" y1="54" x2="495" y2="54" stroke="rgba(0, 180, 255, 0.4)" stroke-width="1.5" stroke-linecap="round" />
+  </g>
+</svg>
