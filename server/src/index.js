@@ -32,6 +32,7 @@ import {
   restoreRecycleItem,
   saveApplication,
   saveCopy,
+  seedColleges,
   toggleCollege,
   toggleSubAdmin,
   trackApplication,
@@ -188,6 +189,14 @@ app.post("/api/admin/applications", requireAdmin, (req, res, next) => createAdmi
 app.patch("/api/admin/applications/:id", requireAdmin, (req, res, next) => updateApplication(req, res).catch(next));
 app.delete("/api/admin/applications/:id", requireAdmin, (req, res, next) => deleteApplication(req, res).catch(next));
 app.patch("/api/admin/colleges/:id/toggle", requireAdmin, (req, res, next) => toggleCollege(req, res).catch(next));
+app.post("/api/admin/colleges/seed", requireAdmin, async (_req, res, next) => {
+  try {
+    const colleges = await seedColleges();
+    res.json({ ok: true, count: colleges.length, colleges });
+  } catch (error) {
+    next(error);
+  }
+});
 app.get("/api/admin/recycle-bin", requireAdmin, (req, res, next) => listRecycleBin(req, res).catch(next));
 app.post("/api/admin/recycle-bin/restore/:id", requireAdmin, (req, res, next) => restoreRecycleItem(req, res).catch(next));
 app.delete("/api/admin/recycle-bin/:id", requireAdmin, (req, res, next) => deleteRecycleItem(req, res).catch(next));
@@ -197,6 +206,7 @@ app.delete("/api/admin/recycle-bin", requireAdmin, (req, res, next) => emptyRecy
 app.get("/api/admin/subadmins", requireAdmin, (req, res, next) => listSubAdmins(req, res).catch(next));
 app.post("/api/admin/subadmins", requireAdmin, (req, res, next) => createSubAdmin(req, res).catch(next));
 app.put("/api/admin/subadmins/:id", requireAdmin, (req, res, next) => updateSubAdmin(req, res).catch(next));
+app.patch("/api/admin/subadmins/:id", requireAdmin, (req, res, next) => updateSubAdmin(req, res).catch(next));
 app.patch("/api/admin/subadmins/:id/toggle", requireAdmin, (req, res, next) => toggleSubAdmin(req, res).catch(next));
 app.patch("/api/admin/subadmins/:id/password", requireAdmin, (req, res, next) => resetSubAdminPassword(req, res).catch(next));
 app.delete("/api/admin/subadmins/:id", requireAdmin, (req, res, next) => deleteSubAdmin(req, res).catch(next));

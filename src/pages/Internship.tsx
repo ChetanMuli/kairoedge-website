@@ -7,13 +7,19 @@ import InternshipDetailsModal, { InternshipTrackItem } from "../components/Inter
 import SectionHeroCard from "../components/SectionHeroCard";
 import { useCopy } from "../context/SiteData";
 
-const TRACKS: (InternshipTrackItem & { iconSvg: React.ReactNode })[] = [
+const TRACKS: (InternshipTrackItem & { iconSvg?: React.ReactNode })[] = [
   {
     id: "cloud-devops",
     title: "Cloud & DevOps",
-    desc: "Learn AWS, Linux and automation by running real deployments.",
-    skills: ["AWS", "Terraform", "CI/CD"],
+    color: "#0284c7",
+    categoryLabel: "Cloud & Infrastructure",
+    desc: "Learn AWS, Linux, and automation by running real deployments and CI/CD pipelines.",
+    skills: ["AWS", "Terraform", "Docker", "CI/CD"],
     duration: "3 to 6 Months",
+    highlights: [
+      "Multi-tier AWS architecture & Docker container pipelines",
+      "Recommendation letter + PPO for top performing candidates"
+    ],
     curriculum: [
       "AWS core infrastructure: EC2 compute, S3 storage, VPC networking, IAM security, and RDS.",
       "Linux server administration, shell scripting, and service management.",
@@ -21,39 +27,41 @@ const TRACKS: (InternshipTrackItem & { iconSvg: React.ReactNode })[] = [
       "Infrastructure as Code with Terraform and automated CI/CD deployment pipelines."
     ],
     liveProject: "Build an automated continuous integration and delivery pipeline for high-availability multi-tier cloud apps on AWS.",
-    eligibility: "Students & freshers in Computer Science, IT, Cloud Computing, or E&TC.",
-    iconSvg: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9.5 4.3 4.3 0 0 1 17.5 18z" />
-      </svg>
-    )
+    eligibility: "Students & freshers in Computer Science, IT, Cloud Computing, or E&TC."
   },
   {
     id: "full-stack",
-    title: "Full-stack web",
-    desc: "Build features end to end, from database to responsive interface.",
-    skills: ["React", "Node.js", "MySQL"],
+    title: "Full-Stack Web Development",
+    color: "#0d9488",
+    categoryLabel: "Web Engineering",
+    desc: "Build modern web features end to end, from database to responsive client interface.",
+    skills: ["React 19", "TypeScript", "Node.js", "MySQL"],
     duration: "3 to 6 Months",
+    highlights: [
+      "React 19, TypeScript & Node.js production web applications",
+      "Real client deliverables with senior code reviews"
+    ],
     curriculum: [
-      "Modern React 18 with TypeScript component architecture, hooks, and clean state handling.",
+      "Modern React 19 with TypeScript component architecture, hooks, and clean state handling.",
       "Node.js & Express RESTful API design, authentication, and validation middleware.",
       "Relational database design in MySQL/PostgreSQL, indexing, and performant query execution.",
       "Team Git workflows, code reviews, and production cloud deployments."
     ],
     liveProject: "Develop an end-to-end customer portal with authentication, live dashboards, and database persistence.",
-    eligibility: "Students & graduates with core JavaScript, HTML/CSS, and database fundamentals.",
-    iconSvg: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14" />
-      </svg>
-    )
+    eligibility: "Students & graduates with core JavaScript, HTML/CSS, and database fundamentals."
   },
   {
     id: "mobile-apps",
-    title: "Mobile apps",
-    desc: "Ship Android and iOS screens with a shared Flutter codebase.",
-    skills: ["Flutter", "Dart", "REST APIs"],
+    title: "Mobile App Development",
+    color: "#8b5cf6",
+    categoryLabel: "Mobile Engineering",
+    desc: "Ship Android and iOS screens with a single shared high-performance Flutter codebase.",
+    skills: ["Flutter", "Dart", "REST APIs", "State Mgmt"],
     duration: "3 to 6 Months",
+    highlights: [
+      "Cross-platform Flutter & Dart for Android and iOS",
+      "Offline-first caching, REST APIs & release-ready bundles"
+    ],
     curriculum: [
       "Flutter framework architecture, widget lifecycle, and reactive state management.",
       "Dart OOP concepts, asynchronous programming with Futures and Streams.",
@@ -61,19 +69,41 @@ const TRACKS: (InternshipTrackItem & { iconSvg: React.ReactNode })[] = [
       "Building responsive layouts across Android and iOS phones and tablets."
     ],
     liveProject: "Build and test a cross-platform mobile app with offline-first caching and release-ready bundles.",
-    eligibility: "Students passionate about mobile application development and Dart.",
-    iconSvg: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM11 18h2" />
-      </svg>
-    )
+    eligibility: "Students passionate about mobile application development and Dart."
+  },
+  {
+    id: "ai-data",
+    title: "AI & Data Solutions",
+    color: "#ec4899",
+    categoryLabel: "AI & Intelligence",
+    desc: "Build generative AI integrations, automate data pipelines, and connect vector databases.",
+    skills: ["Python", "Gemini API", "FastAPI", "Data Modeling"],
+    duration: "3 to 6 Months",
+    highlights: [
+      "Python pipelines, LLM APIs, embeddings & automated workflows",
+      "Hands-on data modeling and production inference systems"
+    ],
+    curriculum: [
+      "Python fundamentals for data manipulation, NumPy, and Pandas workflows.",
+      "Integrating state-of-the-art LLM APIs, prompt engineering, and structured outputs.",
+      "Vector embeddings, semantic search, and Retrieval-Augmented Generation (RAG).",
+      "Containerizing AI microservices with FastAPI and deploying to cloud runtimes."
+    ],
+    liveProject: "Develop an intelligent search and summarization microservice using LLM embeddings and FastAPI.",
+    eligibility: "Students with strong Python foundations and keen interest in AI/ML solutions."
   },
   {
     id: "uiux-design",
-    title: "UI/UX design",
-    desc: "Turn user research into wireframes, prototypes and design systems.",
-    skills: ["Figma", "Wireframes", "Design Systems"],
+    title: "UI/UX & Product Design",
+    color: "#f59e0b",
+    categoryLabel: "Design & UX",
+    desc: "Turn user research into wireframes, interactive prototypes, and design token systems.",
+    skills: ["Figma", "Design Systems", "Prototyping", "WCAG AA"],
     duration: "3 to 6 Months",
+    highlights: [
+      "Figma design tokens, auto-layout & design system creation",
+      "User research, interactive prototypes & developer handoffs"
+    ],
     curriculum: [
       "User research, personas, information architecture, and user journey mapping.",
       "Wireframing, rapid paper-to-digital prototyping, and usability testing.",
@@ -81,12 +111,28 @@ const TRACKS: (InternshipTrackItem & { iconSvg: React.ReactNode })[] = [
       "Accessibility (WCAG AA) standards, responsive grids, and developer handoff documentation."
     ],
     liveProject: "Design an entire SaaS web & mobile dashboard with interactive prototypes and an exhaustive design system.",
-    eligibility: "Students & graduates interested in digital product design, Figma, and human-computer interaction.",
-    iconSvg: (
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z" />
-      </svg>
-    )
+    eligibility: "Students & graduates interested in digital product design, Figma, and human-computer interaction."
+  },
+  {
+    id: "backend-api",
+    title: "Backend & Cloud Systems",
+    color: "#10b981",
+    categoryLabel: "Backend Systems",
+    desc: "Architect performant microservices, relational databases, caching, and secure authentication.",
+    skills: ["Node.js", "MySQL", "Redis", "REST APIs"],
+    duration: "3 to 6 Months",
+    highlights: [
+      "High-throughput REST APIs with MySQL & Redis caching",
+      "Secure JWT authentication, rate limiting & microservices"
+    ],
+    curriculum: [
+      "Asynchronous server architecture, event loops, and microservices patterns.",
+      "Relational schema normalization, complex SQL joins, indexing, and query optimization.",
+      "Authentication patterns, OAuth2, JWT lifecycle, and cryptographic security.",
+      "Caching strategies with Redis, rate limiting, and automated unit testing."
+    ],
+    liveProject: "Build a high-concurrency booking and notification backend service with role-based access control.",
+    eligibility: "Students with solid data structures, algorithms, and backend programming fundamentals."
   }
 ];
 
@@ -138,14 +184,25 @@ export default function Internship() {
             <p className="mut">{copy?.subtext || "Our internship is built for students and fresh graduates who want hands-on experience, not just certificates."}</p>
           </div>
 
-          <div className="tracks">
+          <div className="roles rv">
             {TRACKS.map((track) => (
-              <article key={track.id} className="card rv track-card">
-                {/* Header row: Track Badge + Hiring Status */}
+              <article
+                key={track.id}
+                className="role card"
+                style={{ ["--ac" as any]: track.color || "#0284c7" }}
+              >
+                {/* Header row: Category Pill + Hiring Status */}
                 <div className="role-top-row">
-                  <span className="role-cat-badge" style={{ color: "#0284c7", borderColor: "rgba(2, 132, 199, 0.3)", background: "rgba(2, 132, 199, 0.08)" }}>
-                    <span className="role-cat-dot" style={{ background: "#0284c7" }} />
-                    Industry Track
+                  <span
+                    className="role-cat-badge"
+                    style={{
+                      color: track.color || "#0284c7",
+                      borderColor: `color-mix(in srgb, ${track.color || "#0284c7"} 30%, transparent)`,
+                      background: `color-mix(in srgb, ${track.color || "#0284c7"} 10%, transparent)`
+                    }}
+                  >
+                    <span className="role-cat-dot" style={{ background: track.color || "#0284c7" }} />
+                    {track.categoryLabel || "Industry Track"}
                   </span>
                   <span className="role-hiring-status">
                     <span className="role-hiring-pulse" />
@@ -154,15 +211,10 @@ export default function Internship() {
                 </div>
 
                 {/* Track Title */}
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "10px 0 6px" }}>
-                  <div className="ic" style={{ width: "42px", height: "42px", flexShrink: 0, margin: 0 }}>
-                    {track.iconSvg}
-                  </div>
-                  <h3 className="role-card-title" style={{ margin: 0 }}>{track.title}</h3>
-                </div>
+                <h3 className="role-card-title">{track.title}</h3>
 
-                {/* Metadata Chips */}
-                <div className="role-meta-chips" style={{ marginTop: "10px" }}>
+                {/* Metadata Chips: Location, Duration, Credential */}
+                <div className="role-meta-chips">
                   <span className="role-meta-chip">
                     <MapPin size={13} className="role-meta-icon" />
                     Pune &amp; Ahilyanagar
@@ -183,11 +235,11 @@ export default function Internship() {
                 <div className="role-card-highlights">
                   <div className="role-highlight-item">
                     <CheckCircle2 size={13} className="role-highlight-check" />
-                    <span>Live client project deliverables with senior code reviews</span>
+                    <span>{track.highlights?.[0] || "Live client project deliverables with senior code reviews"}</span>
                   </div>
                   <div className="role-highlight-item">
                     <CheckCircle2 size={13} className="role-highlight-check" />
-                    <span>Recommendation letter + full-time offer for top performers</span>
+                    <span>{track.highlights?.[1] || "Recommendation letter + full-time offer for top performers"}</span>
                   </div>
                 </div>
 
@@ -198,21 +250,21 @@ export default function Internship() {
                   ))}
                 </ul>
 
-                <div className="card-btn-group" style={{ marginTop: "auto", paddingTop: "16px" }}>
+                <div className="card-btn-group">
                   <button
                     type="button"
                     className="btn-card-secondary"
                     onClick={() => handleOpenTrackDetails(track)}
                   >
-                    View Curriculum
+                    View Details
                   </button>
                   <button
                     type="button"
                     className="btn-card-primary"
                     onClick={() => handleOpenInternModal(track.title)}
                   >
-                    <span>Apply for track</span>
-                    <ArrowRight size={14} style={{ marginLeft: "4px" }} />
+                    <span>Apply now</span>
+                    <span aria-hidden="true">&rarr;</span>
                   </button>
                 </div>
               </article>

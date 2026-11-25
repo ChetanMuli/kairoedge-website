@@ -50,7 +50,9 @@ import {
   DollarSign,
   Star,
   MessageCircle,
-  Flame
+  Flame,
+  ShieldCheck,
+  Lock
 } from "lucide-react";
 import { pageCopy, mergeCopy } from "../../shared/pageCopy.js";
 import { useSite } from "../context/SiteData";
@@ -468,10 +470,30 @@ export default function Admin() {
   const [loginError, setLoginError] = useState("");
   const [isLoggingIn, setIsLoggingIn] = useState(false);
 
-  // Layout & Navigation
-  const [activeSection, setActiveSection] = useState("dashboard");
+  // Layout & Navigation - Persistent across browser refresh
+  const [activeSection, setActiveSection] = useState<string>(() => {
+    if (typeof window !== "undefined") {
+      const hash = window.location.hash.replace("#", "").trim();
+      if (hash) return hash;
+      const saved = localStorage.getItem("kairoedge_admin_active_tab");
+      if (saved) return saved;
+    }
+    return "dashboard";
+  });
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Sync active section to URL hash and localStorage on change
+  useEffect(() => {
+    if (activeSection) {
+      try {
+        localStorage.setItem("kairoedge_admin_active_tab", activeSection);
+        if (window.location.hash !== `#${activeSection}`) {
+          window.history.replaceState(null, "", `#${activeSection}`);
+        }
+      } catch {}
+    }
+  }, [activeSection]);
 
   // Live Data State
   const [dashboard, setDashboard] = useState<any>(null);
@@ -925,6 +947,30 @@ export default function Admin() {
       showToast(`College ${data.is_active ? "Activated" : "Deactivated"} successfully.`);
     } catch (err: any) {
       showToast(err.message, "error");
+    }
+  };
+
+  // Auto-Seed Maharashtra Colleges
+  const [seedingColleges, setSeedingColleges] = useState(false);
+  const handleSeedColleges = async () => {
+    try {
+      setSeedingColleges(true);
+      const res = await fetch("/api/admin/colleges/seed", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || "Failed to seed campus colleges.");
+      }
+      const data = await res.json();
+      setContent((prev: any) => ({ ...prev, colleges: data.colleges || [] }));
+      await refreshSite();
+      showToast(`Successfully seeded ${data.count || 50}+ Maharashtra colleges across 9 districts!`);
+    } catch (err: any) {
+      showToast(err.message, "error");
+    } finally {
+      setSeedingColleges(false);
     }
   };
 
@@ -1426,27 +1472,39 @@ export default function Admin() {
       <div className="admin-root">
         <div className="admin-login-screen">
           <div className="admin-login-card">
+            {/* Top Security Clearance Badge */}
+            <div className="admin-login-security-tag">
+              <ShieldCheck size={14} />
+              <span>AUTHORIZED ACCESS ONLY · PUNE HQ &amp; AHILYANAGAR</span>
+            </div>
+
             <div className="admin-login-header">
               <div className="admin-login-brand">
-                <img
-                  src="/logo.svg"
-                  alt="KairoEdge Technologies"
-                  className="admin-login-logo-img"
-                  style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", boxShadow: "0 0 0 2px rgba(0, 180, 255, 0.4), 0 4px 16px rgba(0, 102, 255, 0.3)" }}
-                />
+                <div className="admin-login-logo-glow">
+                  <img
+                    src="/logo.svg"
+                    alt="KairoEdge Technologies"
+                    className="admin-login-logo-img"
+                  />
+                </div>
                 <div className="admin-login-brand-text">
                   KairoEdge
-                  <small>Control Room · Pune (HQ) &amp; Ahilyanagar</small>
+                  <small>Enterprise Control Room</small>
                 </div>
               </div>
-              <h1 className="admin-login-title">Administrator Access</h1>
-              <p className="admin-login-subtitle">Sign in to manage talent pipelines, website content, and client leads</p>
+              <h1 className="admin-login-title">Control Room Sign-In</h1>
+              <p className="admin-login-subtitle">
+                Unified administration for student internships, client leads, and website operations
+              </p>
             </div>
 
             {loginError && (
-              <div style={{ background: "rgba(244, 63, 94, 0.15)", border: "1px solid rgba(244, 63, 94, 0.35)", borderRadius: "8px", padding: "10px 14px", color: "#f87171", fontSize: "0.85rem", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-                <AlertCircle size={16} />
-                <span>{loginError}</span>
+              <div className="admin-login-error-box">
+                <AlertCircle size={18} style={{ flexShrink: 0, marginTop: "1px" }} />
+                <div>
+                  <div style={{ fontWeight: 700, marginBottom: "2px" }}>Access Restricted</div>
+                  <div style={{ fontSize: "0.82rem", lineHeight: 1.45 }}>{loginError}</div>
+                </div>
               </div>
             )}
 
@@ -1458,7 +1516,7 @@ export default function Admin() {
                   <input
                     type="text"
                     className="admin-input"
-                    placeholder="e.g. admin or recruiter"
+                    placeholder="Enter admin username"
                     value={loginUser}
                     onChange={(e) => setLoginUser(e.target.value)}
                     required
@@ -1484,6 +1542,7 @@ export default function Admin() {
                     className="admin-input-reveal"
                     onClick={() => setShowPassword(!showPassword)}
                     tabIndex={-1}
+                    title={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
@@ -1491,14 +1550,30 @@ export default function Admin() {
               </div>
 
               <button type="submit" className="admin-login-btn" disabled={isLoggingIn}>
-                {isLoggingIn ? "Signing in..." : "Enter Control Room →"}
+                {isLoggingIn ? (
+                  <>
+                    <RefreshCw size={16} className="admin-spin" />
+                    <span>Verifying Credentials...</span>
+                  </>
+                ) : (
+                  <>
+                    <span>Enter Control Room</span>
+                    <span aria-hidden="true">&rarr;</span>
+                  </>
+                )}
               </button>
             </form>
 
-            <div style={{ textAlign: "center", marginTop: "24px" }}>
-              <Link to="/" style={{ color: "var(--adm-text-muted)", fontSize: "0.82rem", textDecoration: "none" }}>
-                ← Return to Public Website
-              </Link>
+            <div className="admin-login-trust-footer">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "6px", color: "var(--adm-text-muted)", fontSize: "0.76rem" }}>
+                <Lock size={12} style={{ color: "#10b981" }} />
+                <span>256-Bit SSL Encrypted Session · Strict Role-Based RBAC</span>
+              </div>
+              <div style={{ textAlign: "center", marginTop: "16px" }}>
+                <Link to="/" style={{ color: "#0284c7", fontSize: "0.82rem", textDecoration: "none", fontWeight: 600 }}>
+                  ← Return to Public Website
+                </Link>
+              </div>
             </div>
           </div>
         </div>
@@ -1789,7 +1864,7 @@ export default function Admin() {
                   {activeSection === "copy" && "Page Copy & Content Editor"}
                   {activeSection === "subadmins" && "Sub-Admins & Permissions"}
                   {activeSection === "recycle_bin" && "Recycle Bin & Safety"}
-                  {tableSchemas[activeSection] && tableSchemas[activeSection].label}
+                  {tableSchemas[activeSection] && activeSection !== "colleges" && tableSchemas[activeSection].label}
                 </span>
               </div>
             </div>
@@ -4061,6 +4136,16 @@ export default function Admin() {
                     <p>Manage partnering engineering colleges and institutes in Pune and Maharashtra for campus placements</p>
                   </div>
                   <div className="admin-view-actions">
+                    <button
+                      className="adm-btn adm-btn-sec"
+                      onClick={handleSeedColleges}
+                      disabled={seedingColleges}
+                      style={{ background: "rgba(14, 165, 233, 0.08)", borderColor: "rgba(14, 165, 233, 0.3)", color: "#0284c7", fontWeight: 700 }}
+                      title="Automatically populate 50+ top colleges across Maharashtra districts (Pune, Ahilyanagar, Mumbai, Nashik, Sambhajinagar, etc.)"
+                    >
+                      <Sparkles size={15} />
+                      <span>{seedingColleges ? "Seeding Colleges..." : "⚡ Auto-Seed Maharashtra Colleges"}</span>
+                    </button>
                     <button className="adm-btn adm-btn-pri" onClick={() => handleOpenItemModal("colleges")}>
                       <Plus size={16} />
                       <span>Add Campus College</span>
@@ -4259,8 +4344,40 @@ export default function Admin() {
                           })
                         ) : (
                           <tr>
-                            <td colSpan={8} style={{ textAlign: "center", padding: "40px 20px", color: "var(--adm-text-muted)" }}>
-                              No campus colleges match your filter. Try clearing the search or adding a new college.
+                            <td colSpan={8} style={{ textAlign: "center", padding: "48px 20px" }}>
+                              <div style={{ maxWidth: "460px", margin: "0 auto", display: "flex", flexDirection: "column", alignItems: "center", gap: "12px" }}>
+                                <div style={{ width: "48px", height: "48px", borderRadius: "12px", background: "rgba(14, 165, 233, 0.1)", display: "flex", alignItems: "center", justifyContent: "center", color: "#0ea5e9" }}>
+                                  <GraduationCap size={28} />
+                                </div>
+                                <div style={{ fontWeight: 700, fontSize: "1.05rem", color: "var(--adm-text-bright)" }}>
+                                  {(content.colleges || []).length === 0 ? "No campus colleges in database yet" : "No campus colleges match your filter"}
+                                </div>
+                                <p style={{ color: "var(--adm-text-muted)", fontSize: "0.88rem", margin: 0, lineHeight: 1.5 }}>
+                                  {(content.colleges || []).length === 0
+                                    ? "Populate 50+ top engineering colleges across Pune, Ahilyanagar, Mumbai, Nashik, Sambhajinagar, and Maharashtra with one click."
+                                    : "Try clearing search keywords or district filters to view all colleges."}
+                                </p>
+                                {(content.colleges || []).length === 0 ? (
+                                  <button
+                                    type="button"
+                                    className="adm-btn adm-btn-pri"
+                                    onClick={handleSeedColleges}
+                                    disabled={seedingColleges}
+                                    style={{ marginTop: "6px" }}
+                                  >
+                                    <Sparkles size={16} />
+                                    <span>{seedingColleges ? "Seeding Colleges..." : "⚡ Populate 50+ Maharashtra Colleges Now"}</span>
+                                  </button>
+                                ) : (
+                                  <button
+                                    type="button"
+                                    className="adm-btn adm-btn-sec adm-btn-sm"
+                                    onClick={() => { setSearchQuery(""); setCollegeCityFilter("all"); setCollegeStatusFilter("all"); }}
+                                  >
+                                    Clear Filters
+                                  </button>
+                                )}
+                              </div>
                             </td>
                           </tr>
                         )}

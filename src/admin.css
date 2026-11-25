@@ -93,31 +93,49 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 24px;
+  padding: 32px 20px;
   background: 
-    radial-gradient(circle at 50% 10%, rgba(2, 132, 199, 0.08) 0%, transparent 45%),
-    radial-gradient(circle at 85% 85%, rgba(14, 165, 233, 0.06) 0%, transparent 40%),
-    radial-gradient(circle at 15% 85%, rgba(2, 132, 199, 0.06) 0%, transparent 45%),
-    var(--adm-bg);
+    radial-gradient(circle at 50% 0%, rgba(2, 132, 199, 0.12) 0%, transparent 60%),
+    radial-gradient(circle at 85% 90%, rgba(14, 165, 233, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 15% 90%, rgba(2, 132, 199, 0.08) 0%, transparent 50%),
+    #070d18;
   position: relative;
   overflow: hidden;
 }
 
 .admin-login-card {
   width: 100%;
-  max-width: 440px;
-  background: var(--adm-panel);
-  border: 1px solid var(--adm-border);
-  border-radius: var(--adm-radius-lg);
-  padding: 38px 32px;
-  box-shadow: var(--adm-shadow);
+  max-width: 450px;
+  background: rgba(13, 23, 42, 0.92);
+  backdrop-filter: blur(20px);
+  border: 1px solid rgba(56, 189, 248, 0.22);
+  border-radius: 20px;
+  padding: 40px 34px 32px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
   position: relative;
   z-index: 2;
+  color: #f1f5f9;
+}
+
+.admin-login-security-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(14, 165, 233, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  color: #38bdf8;
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.07em;
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 22px;
+  text-transform: uppercase;
 }
 
 .admin-login-header {
   text-align: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .admin-login-brand {
@@ -125,17 +143,26 @@
   align-items: center;
   gap: 12px;
   margin-bottom: 16px;
-  color: var(--adm-text-bright);
+  color: #ffffff;
 }
 
-.admin-login-brand svg,
+.admin-login-logo-glow {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.5);
+  flex-shrink: 0;
+}
+
 .admin-login-brand img {
-  width: 44px;
-  height: 44px;
+  width: 100%;
+  height: 100%;
   border-radius: 50%;
   object-fit: cover;
-  box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.4), 0 4px 16px rgba(0, 102, 255, 0.3);
-  color: var(--adm-cyan);
+  display: block;
 }
 
 .admin-login-brand-text {
@@ -144,34 +171,71 @@
   font-weight: 800;
   letter-spacing: -0.02em;
   text-align: left;
+  line-height: 1.2;
 }
 
 .admin-login-brand-text small {
   display: block;
-  font-size: 0.68rem;
+  font-size: 0.72rem;
   font-weight: 600;
-  color: var(--adm-cyan);
-  text-transform: uppercase;
-  letter-spacing: 0.08em;
+  color: #38bdf8;
+  letter-spacing: 0.04em;
 }
 
 .admin-login-title {
   font-family: "Manrope", sans-serif;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--adm-text-bright);
-  margin-bottom: 6px;
+  font-size: 1.55rem;
+  font-weight: 800;
+  color: #ffffff;
+  margin: 0 0 6px;
+  letter-spacing: -0.02em;
 }
 
 .admin-login-subtitle {
-  color: var(--adm-text-muted);
-  font-size: 0.9rem;
+  color: #94a3b8;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.admin-login-error-box {
+  background: rgba(239, 68, 68, 0.12);
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #fca5a5;
+  margin-bottom: 18px;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
 }
 
 .admin-login-form {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 18px;
+}
+
+.admin-login-card .admin-field-label {
+  color: #e2e8f0;
+}
+
+.admin-login-card .admin-input {
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.admin-login-card .admin-input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.admin-login-trust-footer {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .admin-field-group {

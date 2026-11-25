@@ -196,28 +196,9 @@ export async function ensureApplications() {
   }
 }
 
-export async function ensureColleges() {
-  await query(`CREATE TABLE IF NOT EXISTS colleges (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    name VARCHAR(200) NOT NULL,
-    code VARCHAR(50) NULL,
-    district VARCHAR(100) NULL,
-    city VARCHAR(100) NULL,
-    state VARCHAR(100) NULL,
-    is_active TINYINT(1) DEFAULT 1,
-    sort_order INT DEFAULT 0,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    UNIQUE KEY uq_college_name (name)
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-
-  const districtCols = await query("SHOW COLUMNS FROM colleges LIKE 'district'");
-  if (!districtCols.length) {
-    await query("ALTER TABLE colleges ADD COLUMN district VARCHAR(100) NULL AFTER code");
-  }
-  await query("UPDATE colleges SET district = city WHERE (district IS NULL OR district = '') AND city IS NOT NULL");
-
+export async function seedColleges() {
   const sampleColleges = [
-    // Pune
+    // 1. Pune District
     ["COEP Technological University", "COEP", "Pune", "Pune", "Maharashtra", 1, 1],
     ["Pune Institute of Computer Technology (PICT)", "PICT", "Pune", "Pune", "Maharashtra", 1, 2],
     ["Vishwakarma Institute of Technology (VIT)", "VIT", "Pune", "Pune", "Maharashtra", 1, 3],
@@ -235,7 +216,7 @@ export async function ensureColleges() {
     ["AISSMS College of Engineering", "AISSMS-COE", "Pune", "Pune", "Maharashtra", 1, 15],
     ["Symbiosis Institute of Technology (SIT)", "SIT", "Pune", "Pune", "Maharashtra", 1, 16],
 
-    // Ahilyanagar (Ahmednagar)
+    // 2. Ahilyanagar (Ahmednagar) District
     ["Amrutvahini College of Engineering, Sangamner", "AVCOE", "Ahilyanagar", "Sangamner", "Maharashtra", 1, 20],
     ["Sanjivani College of Engineering, Kopargaon", "SCOE-KPG", "Ahilyanagar", "Kopargaon", "Maharashtra", 1, 21],
     ["Pravara Rural Engineering College, Loni", "PREC-LONI", "Ahilyanagar", "Loni", "Maharashtra", 1, 22],
@@ -245,14 +226,14 @@ export async function ensureColleges() {
     ["New Arts, Commerce & Science College", "NACSC", "Ahilyanagar", "Ahilyanagar", "Maharashtra", 1, 26],
     ["Hon. Shri. Babanrao Pachpute Vichardhara Trust Faculty of Engineering", "HSBPVT", "Ahilyanagar", "Kashti", "Maharashtra", 1, 27],
 
-    // Chhatrapati Sambhajinagar (Aurangabad)
+    // 3. Chhatrapati Sambhajinagar (Aurangabad) District
     ["Government College of Engineering, Chhatrapati Sambhajinagar", "GECA", "Chhatrapati Sambhajinagar", "Chhatrapati Sambhajinagar", "Maharashtra", 1, 30],
     ["Jawaharlal Nehru Engineering College (JNEC - MGM University)", "JNEC", "Chhatrapati Sambhajinagar", "Chhatrapati Sambhajinagar", "Maharashtra", 1, 31],
     ["Maharashtra Institute of Technology (MIT Aurangabad)", "MIT-CSN", "Chhatrapati Sambhajinagar", "Chhatrapati Sambhajinagar", "Maharashtra", 1, 32],
     ["Deogiri Institute of Engineering and Management Studies", "DIEMS", "Chhatrapati Sambhajinagar", "Chhatrapati Sambhajinagar", "Maharashtra", 1, 33],
     ["PES College of Engineering", "PES-COE", "Chhatrapati Sambhajinagar", "Chhatrapati Sambhajinagar", "Maharashtra", 1, 34],
 
-    // Nashik
+    // 4. Nashik District
     ["K. K. Wagh Institute of Engineering Education & Research", "KKWIEER", "Nashik", "Nashik", "Maharashtra", 1, 40],
     ["Sandip University / Sandip Foundation", "SANDIP", "Nashik", "Nashik", "Maharashtra", 1, 41],
     ["MET Bhujbal Knowledge City", "MET-BKC", "Nashik", "Nashik", "Maharashtra", 1, 42],
@@ -260,7 +241,7 @@ export async function ensureColleges() {
     ["MVP Samaj's K.B.T. College of Engineering", "KBTCOE", "Nashik", "Nashik", "Maharashtra", 1, 44],
     ["Guru Gobind Singh College of Engineering and Research Centre", "GCOERC", "Nashik", "Nashik", "Maharashtra", 1, 45],
 
-    // Mumbai & Navi Mumbai
+    // 5. Mumbai & Navi Mumbai District
     ["Veermata Jijabai Technological Institute (VJTI)", "VJTI", "Mumbai", "Mumbai", "Maharashtra", 1, 50],
     ["Sardar Patel Institute of Technology (SPIT)", "SPIT", "Mumbai", "Mumbai", "Maharashtra", 1, 51],
     ["D. J. Sanghvi College of Engineering", "DJSCE", "Mumbai", "Mumbai", "Maharashtra", 1, 52],
@@ -271,34 +252,67 @@ export async function ensureColleges() {
     ["Pillai College of Engineering", "PCE", "Mumbai", "Navi Mumbai", "Maharashtra", 1, 57],
     ["Ramrao Adik Institute of Technology (RAIT)", "RAIT", "Mumbai", "Navi Mumbai", "Maharashtra", 1, 58],
 
-    // Thane
+    // 6. Thane District
     ["Vidyavardhini's College of Engineering & Technology", "VCET", "Thane", "Vasai", "Maharashtra", 1, 60],
     ["A. P. Shah Institute of Technology", "APSIT", "Thane", "Thane", "Maharashtra", 1, 61],
     ["K. C. College of Engineering & Management Studies", "KC-COE", "Thane", "Thane", "Maharashtra", 1, 62],
 
-    // Kolhapur & Sangli
+    // 7. Kolhapur & Sangli District
     ["Walchand College of Engineering, Sangli", "WCE", "Sangli", "Sangli", "Maharashtra", 1, 70],
     ["DKTE Society's Textile and Engineering Institute", "DKTE", "Kolhapur", "Ichalkaranji", "Maharashtra", 1, 71],
     ["Kolhapur Institute of Technology's College of Engineering (KIT)", "KIT", "Kolhapur", "Kolhapur", "Maharashtra", 1, 72],
     ["D. Y. Patil College of Engineering and Technology", "DYPCET", "Kolhapur", "Kolhapur", "Maharashtra", 1, 73],
 
-    // Solapur
+    // 8. Solapur District
     ["Walchand Institute of Technology (WIT Solapur)", "WIT", "Solapur", "Solapur", "Maharashtra", 1, 80],
     ["N. B. Navale Sinhgad College of Engineering", "NBNSCOE", "Solapur", "Solapur", "Maharashtra", 1, 81],
 
-    // Nagpur
+    // 9. Nagpur District
     ["Visvesvaraya National Institute of Technology (VNIT)", "VNIT", "Nagpur", "Nagpur", "Maharashtra", 1, 90],
     ["Shri Ramdeobaba College of Engineering and Management (RCOEM)", "RCOEM", "Nagpur", "Nagpur", "Maharashtra", 1, 91],
     ["G. H. Raisoni College of Engineering", "GHRECO", "Nagpur", "Nagpur", "Maharashtra", 1, 92]
   ];
 
   for (const row of sampleColleges) {
-    await query(
-      `INSERT INTO colleges (name, code, district, city, state, is_active, sort_order)
-       VALUES (?, ?, ?, ?, ?, ?, ?)
-       ON DUPLICATE KEY UPDATE district = VALUES(district), city = VALUES(city), is_active = VALUES(is_active)`,
-      row
-    ).catch(() => {});
+    const existing = await query("SELECT id FROM colleges WHERE name = ? OR (code = ? AND code IS NOT NULL)", [row[0], row[1]]);
+    if (!existing.length) {
+      await query(
+        "INSERT INTO colleges (name, code, district, city, state, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        row
+      ).catch(() => {});
+    } else {
+      await query(
+        "UPDATE colleges SET district = ?, city = ?, state = ?, is_active = ? WHERE id = ?",
+        [row[2], row[3], row[4], row[5], existing[0].id]
+      ).catch(() => {});
+    }
+  }
+
+  return await query("SELECT * FROM colleges ORDER BY sort_order, name");
+}
+
+export async function ensureColleges() {
+  await query(`CREATE TABLE IF NOT EXISTS colleges (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    code VARCHAR(50) NULL,
+    district VARCHAR(100) NULL,
+    city VARCHAR(100) NULL,
+    state VARCHAR(100) NULL,
+    is_active TINYINT(1) DEFAULT 1,
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+
+  const districtCols = await query("SHOW COLUMNS FROM colleges LIKE 'district'");
+  if (!districtCols.length) {
+    await query("ALTER TABLE colleges ADD COLUMN district VARCHAR(100) NULL AFTER code").catch(() => {});
+  }
+  await query("UPDATE colleges SET district = city WHERE (district IS NULL OR district = '') AND city IS NOT NULL").catch(() => {});
+
+  const count = await query("SELECT COUNT(*) AS total FROM colleges");
+  if (!Number(count[0]?.total) || Number(count[0]?.total) < 20) {
+    await seedColleges().catch(() => {});
   }
 }
 
@@ -733,6 +747,9 @@ export async function listContent(_req, res) {
   const content = {};
   for (const table of Object.keys(tables)) {
     content[table] = await query(`SELECT * FROM \`${table}\` ORDER BY id`);
+  }
+  if (!content.colleges || content.colleges.length === 0) {
+    content.colleges = await seedColleges().catch(() => []);
   }
   content.copy = await readCopy();
   content.applications = await query(

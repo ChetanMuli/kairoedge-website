@@ -10,13 +10,18 @@
     "server": "npm run dev --prefix server",
     "server:install": "npm install --prefix server",
     "server:start": "npm run start --prefix server",
-    "db:setup": "npm run setup --prefix server"
+    "db:setup": "npm run setup --prefix server",
+    "postinstall": "npm install --prefix server"
   },
   "dependencies": {
     "@types/node": "^26.6.5",
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.6.1",
+    "express": "^4.21.2",
     "lucide-react": "^1.55.0",
+    "mysql2": "^3.14.1",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
     "react-helmet-async": "^3.0.0",
