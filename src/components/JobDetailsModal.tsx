@@ -12,7 +12,9 @@ export interface JobDetailItem {
   roleParam: string;
   iconPath?: string;
   experience?: string;
+  type?: string;
   location?: string;
+  highlights?: string[];
   responsibilities?: string[];
   requirements?: string[];
   whatWeOffer?: string[];

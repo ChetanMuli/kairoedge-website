@@ -154,9 +154,9 @@ footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
 @media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}.rv{opacity:1!important;transform:none!important}.hero h1 span i{transform:none!important}.hero p.lead,.cta,.term{opacity:1!important}.mq div{animation:none}}
 
 #pg{position:fixed;top:0;left:0;height:3px;width:100%;transform-origin:left;transform:scaleX(0);background:linear-gradient(90deg,var(--blue),var(--sun));z-index:60}
-.hero .wrap{display:grid;grid-template-columns:1.15fr 0.85fr;gap:48px;align-items:center;max-width:1240px;margin:0 auto}
-.hero .hl{max-width:620px}
-.hero h1{font-size:clamp(2.35rem,4.2vw,3.5rem)!important;max-width:18ch!important;line-height:1.1!important;letter-spacing:-.035em!important}
+.hero .wrap{display:grid;grid-template-columns:1.2fr 0.9fr;gap:56px;align-items:center;max-width:1240px;margin:0 auto}
+.hero .hl{max-width:640px}
+.hero h1{font-size:clamp(2.5rem,4.4vw,3.6rem)!important;max-width:18ch!important;line-height:1.12!important;letter-spacing:-.035em!important}
 @media(max-width:980px){.hero .wrap{grid-template-columns:1fr;gap:24px}.hero{padding:96px 0 32px}.hero .hl{max-width:100%}.hero h1{font-size:clamp(1.9rem,6.2vw,2.5rem)!important;max-width:none!important}.hero p.lead{font-size:.95rem;margin:12px 0 18px;max-width:none}}
 .term{background:#080D22;border:1px solid rgba(160,175,255,.25);border-radius:14px;box-shadow:0 24px 50px -20px rgba(0,0,0,.5),0 0 36px -16px var(--blue);transform:perspective(900px) rotateY(var(--ry,-6deg)) rotateX(var(--rx,3deg));transition:transform .3s;color:#C8D2FF;font:500 .82rem/1.65 ui-monospace,'SF Mono',Consolas,monospace;overflow:hidden;opacity:0;animation:fade .8s 1s forwards}
 .tb{display:flex;align-items:center;gap:6px;padding:9px 14px;border-bottom:1px solid rgba(160,175,255,.18)}
@@ -295,7 +295,7 @@ header .btn.pri.nc:hover,.btn.nc:hover{transform:translateY(-2px);box-shadow:0 8
   }
   .links.open a::after{display:none!important}
   .menu-cta{display:flex!important;justify-content:center!important;margin-top:10px;padding-top:16px;border-top:1px solid var(--line)}
-  .menu-cta .btn{width:auto!important;min-width:175px;max-width:220px;justify-content:center;min-height:42px!important;padding:10px 24px!important;font-size:.94rem!important;font-weight:650!important;border-radius:999px!important}
+  .menu-cta .btn{width:auto!important;min-width:200px;max-width:260px;justify-content:center;min-height:46px!important;padding:12px 28px!important;font-size:1rem!important;font-weight:700!important;border-radius:999px!important}
 }
 .menu-backdrop{display:block;position:fixed;inset:0;background:rgba(4,7,20,.72);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:48;animation:fade .2s ease forwards}
 :root[data-theme="light"] .menu-backdrop{background:rgba(16,22,54,.38)}
@@ -871,23 +871,26 @@ textarea{resize:vertical}
 }
 
 @media (max-width: 640px) {
+  .modal-backdrop {
+    padding: 12px 8px max(18px, env(safe-area-inset-bottom, 18px)) 8px !important;
+  }
   .modal-wrap {
-    padding: 0 8px;
+    padding: 0 4px;
     width: 100%;
     max-width: 100%;
-    max-height: 88dvh;
+    max-height: 90dvh;
     box-sizing: border-box;
-    margin: auto auto max(12px, env(safe-area-inset-bottom, 12px));
+    margin: auto;
   }
   .modal-card {
-    padding: 20px 16px 36px !important;
+    padding: 20px 16px 54px !important;
     border-radius: 18px;
-    max-height: 86dvh !important;
+    max-height: 88dvh !important;
     -webkit-overflow-scrolling: touch;
     overscroll-behavior: contain;
   }
   .modal-form {
-    padding-bottom: 24px !important;
+    padding-bottom: 48px !important;
   }
 }
 
@@ -1536,6 +1539,148 @@ select option,
   border-top: 1px solid var(--line);
 }
 
+/* ==========================================================================
+   Enterprise Role Cards (Careers Section)
+   ========================================================================== */
+.role-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.role-cat-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid;
+  font-size: 0.72rem;
+  font-weight: 750;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.role-cat-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.role-hiring-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 650;
+  color: #16a34a;
+  background: rgba(34, 197, 94, 0.08);
+  border: 1px solid rgba(34, 197, 94, 0.22);
+  padding: 3px 9px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.role-hiring-pulse {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 6px #22c55e;
+}
+
+.role-card-title {
+  font-size: 1.25rem !important;
+  font-weight: 800 !important;
+  margin: 0 0 8px !important;
+  color: var(--ink) !important;
+  letter-spacing: -0.02em !important;
+  line-height: 1.25 !important;
+}
+
+.role-meta-chips {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.role-meta-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--mut);
+  background: color-mix(in srgb, var(--card) 90%, var(--line));
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+}
+
+.role-meta-icon {
+  color: var(--sun);
+  flex-shrink: 0;
+}
+
+.role-card-desc {
+  font-size: 0.92rem;
+  line-height: 1.55;
+  color: var(--mut);
+  margin: 0 0 12px;
+}
+
+.role-card-highlights {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--blue) 6%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--blue) 14%, var(--line));
+}
+
+.role-highlight-item {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.8rem;
+  font-weight: 550;
+  color: var(--ink);
+  line-height: 1.35;
+}
+
+.role-highlight-check {
+  color: #10b981;
+  flex-shrink: 0;
+}
+
+.role-skills-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 0 0 16px;
+  padding: 0;
+  list-style: none;
+}
+
+.role-skills-pills li {
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--blue) 10%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--blue) 22%, var(--line));
+  color: var(--ink);
+  white-space: nowrap;
+}
+
 .card-btn-group {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1667,15 +1812,16 @@ select option,
 @media (max-width: 520px) {
   .modal-actions-row {
     flex-direction: column-reverse;
-    gap: 10px;
-    margin-top: 14px;
-    padding-bottom: 16px;
+    gap: 12px;
+    margin-top: 18px;
+    padding-bottom: 24px;
   }
   .modal-actions-row .btn {
     width: 100% !important;
-    min-height: 46px !important;
+    min-height: 48px !important;
     justify-content: center !important;
-    font-size: 0.94rem !important;
+    font-size: 0.96rem !important;
+    font-weight: 650 !important;
   }
 }
 

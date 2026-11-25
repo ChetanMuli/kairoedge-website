@@ -144,6 +144,10 @@ export default function SearchableSelect({
             <input
               ref={searchInputRef}
               type="text"
+              autoFocus={false}
+              autoComplete="off"
+              autoCorrect="off"
+              spellCheck={false}
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder={searchPlaceholder}

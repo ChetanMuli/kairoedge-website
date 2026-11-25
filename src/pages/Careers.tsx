@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { MapPin, Briefcase, ArrowRight } from "lucide-react";
+import { MapPin, Briefcase, ArrowRight, Clock, CheckCircle2 } from "lucide-react";
 import SEO from "../components/SEO";
 import JobApplicationModal from "../components/JobApplicationModal";
 import JobDetailsModal, { JobDetailItem } from "../components/JobDetailsModal";
@@ -14,66 +14,108 @@ const DEFAULT_ROLES: JobDetailItem[] = [
     category: "eng",
     categoryLabel: "Engineering",
     title: "Cloud & DevOps Engineer",
-    desc: "Design and run secure, automated AWS infrastructure for client products.",
+    desc: "Design and run secure, automated AWS infrastructure, container pipelines and cloud platforms.",
     color: "#3B82F6",
-    tags: ["AWS", "Terraform", "CI/CD"],
+    tags: ["AWS", "Docker", "Terraform", "CI/CD"],
     roleParam: "Cloud & DevOps Engineer",
-    iconPath: "M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9.5 4.3 4.3 0 0 1 17.5 18z"
+    iconPath: "M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9.5 4.3 4.3 0 0 1 17.5 18z",
+    experience: "1 - 3 Years",
+    type: "Full-Time",
+    location: "Pune (HQ) · Hybrid",
+    highlights: [
+      "Production AWS cloud architectures & serverless workloads",
+      "Automated CI/CD pipelines & zero-downtime deployments"
+    ]
   },
   {
     id: "full-stack",
     category: "eng",
     categoryLabel: "Engineering",
-    title: "Full-Stack Developer",
-    desc: "Build web platforms and APIs end to end for clients across industries.",
-    color: "#8B5CF6",
-    tags: ["React", "Node.js", "MySQL"],
+    title: "Full-Stack Software Engineer",
+    desc: "Build scalable web platforms, customer dashboards and resilient APIs end-to-end.",
+    color: "#0070F3",
+    tags: ["React", "TypeScript", "Node.js", "MySQL"],
     roleParam: "Full-Stack Developer",
-    iconPath: "m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14"
+    iconPath: "m8 8-5 4 5 4M16 8l5 4-5 4M14 5l-4 14",
+    experience: "1 - 3 Years",
+    type: "Full-Time",
+    location: "Pune (HQ) · Hybrid",
+    highlights: [
+      "High-performance React & Vite enterprise interfaces",
+      "Robust Node.js REST services & database optimizations"
+    ]
   },
   {
     id: "mobile-dev",
     category: "eng",
     categoryLabel: "Engineering",
-    title: "Mobile App Developer",
-    desc: "Ship polished Android and iOS apps from a shared Flutter codebase.",
+    title: "Mobile App Developer (Flutter)",
+    desc: "Ship polished cross-platform Android & iOS apps with fluid native-feel animations and offline sync.",
     color: "#14B8A6",
-    tags: ["Flutter", "Dart", "REST APIs"],
+    tags: ["Flutter", "Dart", "REST APIs", "State Mgmt"],
     roleParam: "Mobile App Developer",
-    iconPath: "M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM11 18h2"
+    iconPath: "M7 2h10a2 2 0 0 1 2 2v16a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2zM11 18h2",
+    experience: "1 - 2 Years",
+    type: "Full-Time",
+    location: "Pune (HQ) / Ahilyanagar",
+    highlights: [
+      "Cross-platform Flutter codebases for iOS & Android",
+      "RESTful API integration & responsive mobile UX"
+    ]
   },
   {
     id: "qa-eng",
     category: "eng",
     categoryLabel: "Engineering",
     title: "QA Automation Engineer",
-    desc: "Keep releases reliable with automated tests and quality checks.",
+    desc: "Keep production releases reliable through end-to-end regression suites and API test automation.",
     color: "#22C55E",
-    tags: ["Test automation", "API testing", "CI"],
+    tags: ["Test Automation", "Postman", "Cypress", "CI/CD"],
     roleParam: "QA Automation Engineer",
-    iconPath: "M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6zM9 12l2 2 4-4"
+    iconPath: "M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6zM9 12l2 2 4-4",
+    experience: "1 - 2 Years",
+    type: "Full-Time",
+    location: "Pune (HQ) · Hybrid",
+    highlights: [
+      "Automated test suites & continuous regression testing",
+      "API payload validation & load benchmark reporting"
+    ]
   },
   {
     id: "uiux-designer",
     category: "des",
     categoryLabel: "Design",
-    title: "UI/UX Designer",
-    desc: "Turn user needs into clear, accessible interfaces and prototypes.",
+    title: "Product & UI/UX Designer",
+    desc: "Translate complex business logic into intuitive, accessible web and mobile design systems.",
     color: "#F59E0B",
-    tags: ["Figma", "Prototyping", "Design systems"],
+    tags: ["Figma", "Design Systems", "Prototyping", "UX Research"],
     roleParam: "UI/UX Designer",
-    iconPath: "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"
+    iconPath: "M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z",
+    experience: "1 - 3 Years",
+    type: "Full-Time",
+    location: "Pune (HQ) · Hybrid",
+    highlights: [
+      "High-fidelity Figma prototypes & tokenized design systems",
+      "Direct developer handoffs with component specifications"
+    ]
   },
   {
     id: "bde",
     category: "biz",
     categoryLabel: "Business",
     title: "Business Development Executive",
-    desc: "Find new clients, run discovery calls and prepare proposals.",
+    desc: "Connect with prospective enterprise clients, manage discovery consultations and close deals.",
     color: "#EC4899",
-    tags: ["Outreach", "Proposals", "CRM"],
+    tags: ["Client Outreach", "Proposals", "B2B Sales", "CRM"],
     roleParam: "Business Development Executive",
-    iconPath: "M3 17l6-6 4 4 8-8M15 7h6v6"
+    iconPath: "M3 17l6-6 4 4 8-8M15 7h6v6",
+    experience: "1 - 3 Years",
+    type: "Full-Time",
+    location: "Pune (HQ) / Ahilyanagar",
+    highlights: [
+      "Enterprise software sales pipeline & discovery sessions",
+      "Client proposals, negotiation & relationship management"
+    ]
   }
 ];
 
@@ -164,7 +206,13 @@ function mapDatabaseJobToDetailItem(job: any, index: number): JobDetailItem {
     tags,
     roleParam: title,
     iconPath,
-    location: job.location || "Pune (hybrid)",
+    location: job.location || "Pune (HQ) · Hybrid",
+    experience: job.experience || "1 - 3 Years",
+    type: "Full-Time",
+    highlights: [
+      "Mentorship & enterprise code review cadences",
+      "Real production architectures deployed on AWS/Cloud"
+    ],
     responsibilities: parsed.responsibilities,
     requirements: parsed.requirements
   };
@@ -340,32 +388,65 @@ export default function Careers() {
                 data-c={role.category}
                 style={{ ["--ac" as any]: role.color }}
               >
-                <div className="rt" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
-                  <div className="ic">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <path d={role.iconPath} />
-                    </svg>
-                  </div>
-                  <span className="bd" style={{ textTransform: "uppercase", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", padding: "4px 10px", borderRadius: "999px" }}>
+                {/* Header row: Category Pill + Actively Hiring */}
+                <div className="role-top-row">
+                  <span
+                    className="role-cat-badge"
+                    style={{
+                      color: role.color,
+                      borderColor: `color-mix(in srgb, ${role.color} 30%, transparent)`,
+                      background: `color-mix(in srgb, ${role.color} 10%, transparent)`
+                    }}
+                  >
+                    <span className="role-cat-dot" style={{ background: role.color }} />
                     {role.categoryLabel}
                   </span>
-                </div>
-                <h3 style={{ fontSize: "1.25rem", fontWeight: 750, margin: "0 0 8px", color: "var(--ink)", letterSpacing: "-0.02em" }}>{role.title}</h3>
-                <p className="mut" style={{ fontSize: "0.92rem", lineHeight: 1.55, margin: "0 0 14px" }}>{role.desc}</p>
-                <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "var(--mut)", fontSize: "0.82rem", marginBottom: "12px", flexWrap: "wrap" }}>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    <MapPin size={13} style={{ color: "var(--sun)" }} /> Pune (Hybrid)
-                  </span>
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
-                    <Briefcase size={13} style={{ color: "var(--sun)" }} /> Full-time
+                  <span className="role-hiring-status">
+                    <span className="role-hiring-pulse" />
+                    Actively Hiring
                   </span>
                 </div>
-                <ul>
+
+                <h3 className="role-card-title">{role.title}</h3>
+
+                {/* Metadata Row: Location, Work Type, Experience */}
+                <div className="role-meta-chips">
+                  <span className="role-meta-chip">
+                    <MapPin size={13} className="role-meta-icon" />
+                    {role.location || "Pune (HQ) · Hybrid"}
+                  </span>
+                  <span className="role-meta-chip">
+                    <Briefcase size={13} className="role-meta-icon" />
+                    {role.type || "Full-time"}
+                  </span>
+                  <span className="role-meta-chip">
+                    <Clock size={13} className="role-meta-icon" />
+                    {role.experience || "1 - 3 Years"}
+                  </span>
+                </div>
+
+                <p className="role-card-desc">{role.desc}</p>
+
+                {/* Key Deliverables / Highlights */}
+                <div className="role-card-highlights">
+                  <div className="role-highlight-item">
+                    <CheckCircle2 size={13} className="role-highlight-check" />
+                    <span>{role.highlights?.[0] || "Mentorship & code review cadences"}</span>
+                  </div>
+                  <div className="role-highlight-item">
+                    <CheckCircle2 size={13} className="role-highlight-check" />
+                    <span>{role.highlights?.[1] || "Production cloud systems & real client deliverables"}</span>
+                  </div>
+                </div>
+
+                {/* Skill Pills */}
+                <ul className="role-skills-pills">
                   {role.tags.map((tag) => (
                     <li key={tag}>{tag}</li>
                   ))}
                 </ul>
-                <div className="card-btn-group" style={{ marginTop: "18px" }}>
+
+                <div className="card-btn-group">
                   <button
                     type="button"
                     className="btn-card-secondary"
