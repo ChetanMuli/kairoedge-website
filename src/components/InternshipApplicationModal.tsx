@@ -121,6 +121,17 @@ export default function InternshipApplicationModal({
 
   const modalCardRef = useRef<HTMLDivElement>(null);
 
+  // Lock body scroll when modal is open
+  useEffect(() => {
+    if (isOpen) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prevOverflow || "";
+      };
+    }
+  }, [isOpen]);
+
   // Fetch active campus colleges from backend API
   useEffect(() => {
     fetch("/api/colleges")

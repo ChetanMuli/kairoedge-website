@@ -127,7 +127,7 @@ export default function Home() {
         <div className="edge" />
         <div className="wrap">
           <div className="hl">
-            <div style={{ display: "inline-flex", alignItems: "center", gap: "8px", padding: "6px 14px", borderRadius: "999px", background: "rgba(0, 210, 255, 0.1)", border: "1px solid rgba(0, 210, 255, 0.28)", color: "#38bdf8", fontSize: "0.82rem", fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase", marginBottom: "16px" }}>
+            <div className="hero-badge">
               <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
               <span>IT COMPANY · PUNE (HQ) &amp; AHILYANAGAR, MH</span>
             </div>

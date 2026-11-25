@@ -954,33 +954,64 @@
   box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.15) !important;
 }
 
+.admin-toolbar-left select,
+.admin-toolbar-left select.admin-filter-select,
 .admin-filter-select {
   width: auto !important;
-  min-width: 140px;
-  max-width: 220px;
+  flex: 0 0 auto !important;
+  min-width: 135px !important;
+  max-width: 230px !important;
   height: 38px !important;
   padding: 0 32px 0 12px !important;
-  background: var(--adm-card) !important;
+  background-color: var(--adm-card) !important;
   border: 1.5px solid var(--adm-border) !important;
   border-radius: 8px !important;
   color: var(--adm-text) !important;
-  font-size: 0.84rem !important;
-  font-weight: 550;
+  font-size: 0.83rem !important;
+  font-weight: 600 !important;
   outline: none !important;
-  cursor: pointer;
+  cursor: pointer !important;
   box-sizing: border-box !important;
-  transition: all 0.18s ease;
-  appearance: none;
-  -webkit-appearance: none;
-  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
+  transition: all 0.18s ease !important;
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%230284c7' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e") !important;
   background-repeat: no-repeat !important;
   background-position: right 10px center !important;
   background-size: 14px !important;
 }
 
+.admin-toolbar-left select:focus,
+.admin-toolbar-left select:hover,
 .admin-filter-select:focus,
 .admin-filter-select:hover {
   border-color: var(--adm-primary) !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12) !important;
+}
+
+.admin-filter-reset-btn {
+  height: 38px !important;
+  padding: 0 14px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 6px !important;
+  font-size: 0.82rem !important;
+  font-weight: 600 !important;
+  border-radius: 8px !important;
+  background: var(--adm-panel) !important;
+  color: var(--adm-text-muted) !important;
+  border: 1.5px solid var(--adm-border) !important;
+  cursor: pointer !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  transition: all 0.15s ease !important;
+  text-decoration: none !important;
+}
+
+.admin-filter-reset-btn:hover {
+  background: rgba(239, 68, 68, 0.08) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+  color: #dc2626 !important;
 }
 
 .admin-toolbar-right {
@@ -1004,12 +1035,13 @@
   background: var(--adm-panel);
   border: 1px solid var(--adm-border);
   border-radius: var(--adm-radius-md);
-  padding: 20px;
+  padding: 22px;
   display: flex;
   flex-direction: column;
   gap: 16px;
   transition: all 0.2s ease;
   position: relative;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
 }
 
 .admin-candidate-card:hover {
@@ -1035,6 +1067,187 @@
 }
 .admin-candidate-card.status-rejected {
   border-left: 4px solid var(--adm-reject);
+}
+
+/* Enhanced Candidate Info Blocks & Identity */
+.admin-candidate-name {
+  font-family: "Manrope", sans-serif;
+  font-size: 1.15rem;
+  font-weight: 750;
+  color: var(--adm-text-bright);
+}
+
+.admin-ref-id-badge {
+  font-family: "JetBrains Mono", monospace;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(148, 163, 184, 0.12);
+  color: var(--adm-text-muted);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+  letter-spacing: 0.04em;
+}
+
+.admin-candidate-avatar.intern-avatar {
+  background: linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%);
+}
+
+.admin-candidate-role-pill.intern-pill {
+  background: rgba(14, 165, 233, 0.12);
+  color: #0284c7;
+  border-color: rgba(14, 165, 233, 0.28);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.admin-candidate-info-blocks {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 14px 16px;
+}
+
+.admin-info-block-college {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.admin-info-block-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: rgba(2, 132, 199, 0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(2, 132, 199, 0.18);
+}
+
+.admin-info-block-content {
+  flex: 1;
+}
+
+.admin-info-block-title {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #64748b;
+  margin-bottom: 2px;
+}
+
+.admin-info-block-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.admin-info-block-main strong {
+  font-size: 0.96rem;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.admin-district-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(2, 132, 199, 0.1);
+  color: #0284c7;
+  border: 1px solid rgba(2, 132, 199, 0.22);
+}
+
+.admin-info-block-academics {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding-top: 8px;
+  border-top: 1px dashed #cbd5e1;
+}
+
+.admin-academic-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  font-size: 0.8rem;
+}
+
+.admin-academic-chip .chip-label {
+  color: #64748b;
+  font-weight: 500;
+}
+
+.admin-academic-chip .chip-value {
+  color: #0f172a;
+  font-weight: 700;
+}
+
+.admin-academic-chip.highlight {
+  background: rgba(2, 132, 199, 0.06);
+  border-color: rgba(2, 132, 199, 0.25);
+}
+
+.admin-academic-chip.highlight .chip-value {
+  color: #0284c7;
+}
+
+.admin-interview-banner {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  background: rgba(14, 165, 233, 0.08);
+  border: 1px solid rgba(14, 165, 233, 0.25);
+  border-radius: 8px;
+  font-size: 0.84rem;
+  color: #0369a1;
+}
+
+.admin-compact-notes {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 12px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+}
+
+.admin-compact-notes .notes-label {
+  font-size: 0.76rem;
+  font-weight: 700;
+  color: #64748b;
+  white-space: nowrap;
+}
+
+.admin-compact-notes-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.82rem;
+  color: #0f172a;
+  outline: none;
+}
+
+.admin-compact-notes-input::placeholder {
+  color: #94a3b8;
 }
 
 .admin-candidate-header {
@@ -1639,6 +1852,14 @@
   gap: 12px;
 }
 
+.admin-candidate-list + .admin-pagination,
+.admin-leads-list + .admin-pagination {
+  border: 1px solid var(--adm-border) !important;
+  border-radius: var(--adm-radius-md) !important;
+  margin-top: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+}
+
 .admin-pagination-info {
   font-size: 0.82rem;
   color: var(--adm-text-muted);
@@ -1937,6 +2158,26 @@
   .admin-toolbar {
     flex-direction: column;
     align-items: stretch;
+    gap: 12px;
+  }
+  .admin-toolbar-left {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .admin-search-wrap {
+    min-width: 100%;
+    max-width: 100%;
+    flex: 1 1 100%;
+  }
+  .admin-filter-select,
+  .admin-toolbar-left select {
+    flex: 1 1 135px !important;
+    min-width: 135px !important;
+    max-width: 100% !important;
+  }
+  .admin-filter-reset-btn {
+    flex: 0 0 auto !important;
   }
   .admin-candidate-header {
     flex-direction: column;

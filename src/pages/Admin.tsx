@@ -307,18 +307,37 @@ const tableSchemas: Record<
     label: "Campus Colleges",
     icon: GraduationCap,
     fields: [
-      { name: "name", label: "College / University Name", type: "text" },
-      { name: "code", label: "College Code", type: "text", hint: "e.g., COEP, PICT, AVCOE" },
+      {
+        name: "name",
+        label: "College / Institute Full Name",
+        type: "text",
+        hint: "Official full name of the engineering college or university campus"
+      },
       {
         name: "district",
         label: "District",
         type: "select",
         options: MAHARASHTRA_DISTRICTS,
-        hint: "Maharashtra district where campus is located"
+        hint: "Maharashtra district location (used for student filtering)"
       },
-      { name: "city", label: "City / Campus Area", type: "text", hint: "e.g., Shivajinagar, Sangamner" },
-      { name: "state", label: "State", type: "text", hint: "e.g., Maharashtra" },
-      { name: "sort_order", label: "Sort Order", type: "number" }
+      {
+        name: "city",
+        label: "City / Campus Area",
+        type: "text",
+        hint: "Campus locality e.g., Sangamner, Pune, Shivajinagar"
+      },
+      {
+        name: "code",
+        label: "College Short Code (Optional)",
+        type: "text",
+        hint: "Short code or acronym e.g., AVCOE, PICT, COEP (Optional)"
+      },
+      {
+        name: "state",
+        label: "State",
+        type: "text",
+        hint: "Default: Maharashtra"
+      }
     ]
   }
 };
@@ -337,9 +356,9 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
   onPageChange
 }) => {
   const totalPages = Math.max(1, Math.ceil(totalItems / pageSize));
-  if (totalItems <= pageSize) return null;
+  if (totalItems === 0) return null;
 
-  const startItem = (currentPage - 1) * pageSize + 1;
+  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * pageSize + 1;
   const endItem = Math.min(currentPage * pageSize, totalItems);
 
   const pages: (number | string)[] = [];
@@ -356,6 +375,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
   }
 
   const handlePageSelect = (p: number) => {
+    if (p < 1 || p > totalPages) return;
     onPageChange(p);
     window.scrollTo({ top: 0, behavior: "smooth" });
     document.querySelector(".admin-main")?.scrollTo({ top: 0, behavior: "smooth" });
@@ -364,13 +384,13 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
   return (
     <div className="admin-pagination">
       <div className="admin-pagination-info">
-        Showing <strong>{startItem}</strong> - <strong>{endItem}</strong> of <strong>{totalItems}</strong> entries
+        Showing <strong>{startItem}</strong> - <strong>{endItem}</strong> of <strong>{totalItems}</strong> records (Page {currentPage} of {totalPages})
       </div>
       <div className="admin-pagination-pages">
         <button
           type="button"
           className="admin-page-btn"
-          disabled={currentPage === 1}
+          disabled={currentPage <= 1}
           onClick={() => handlePageSelect(currentPage - 1)}
           title="Previous page"
         >
@@ -397,7 +417,7 @@ const PaginationControls: React.FC<PaginationControlsProps> = ({
         <button
           type="button"
           className="admin-page-btn"
-          disabled={currentPage === totalPages}
+          disabled={currentPage >= totalPages}
           onClick={() => handlePageSelect(currentPage + 1)}
           title="Next page"
         >
@@ -555,6 +575,26 @@ export default function Admin() {
     permissions: ["job_apps", "intern_apps", "inquiries"]
   });
   const [isCreatingSubAdmin, setIsCreatingSubAdmin] = useState(false);
+
+  // Lock body scroll when any modal is open
+  const isAnyModalOpen = Boolean(
+    editingLead ||
+    editingCandidate ||
+    selectedCandidate ||
+    editingTable ||
+    showSubAdminModal ||
+    editingSubAdmin
+  );
+
+  useEffect(() => {
+    if (isAnyModalOpen) {
+      const prevOverflow = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prevOverflow || "";
+      };
+    }
+  }, [isAnyModalOpen]);
 
   // Toast helper
   const showToast = (message: string, type: "success" | "error" = "success") => {
@@ -1225,20 +1265,27 @@ export default function Admin() {
   }, [content.applications]);
 
   const distinctInternColleges = useMemo<string[]>(() => {
-    const colleges: string[] = (content.applications || [])
+    const fromApps: string[] = (content.applications || [])
       .filter((a: any) => a.kind === "internship")
       .map((a: any) => a.college)
       .filter(Boolean);
-    return Array.from(new Set(colleges)).sort();
-  }, [content.applications]);
+    const fromCollegesTable: string[] = (content.colleges || [])
+      .map((c: any) => c.name)
+      .filter(Boolean);
+    return Array.from(new Set([...fromCollegesTable, ...fromApps])).sort();
+  }, [content.applications, content.colleges]);
 
   const distinctInternDistricts = useMemo<string[]>(() => {
-    const districts: string[] = (content.applications || [])
-      .filter((a: any) => a.kind === "internship")
-      .map((a: any) => a.district)
-      .filter(Boolean);
-    return Array.from(new Set(districts)).sort();
-  }, [content.applications]);
+    const set = new Set<string>(MAHARASHTRA_DISTRICTS);
+    (content.applications || []).forEach((a: any) => {
+      if (a.district) set.add(a.district);
+    });
+    (content.colleges || []).forEach((c: any) => {
+      if (c.district) set.add(c.district);
+      if (c.city) set.add(c.city);
+    });
+    return Array.from(set).filter(Boolean).sort();
+  }, [content.applications, content.colleges]);
 
   const distinctLeadServices = useMemo<string[]>(() => {
     const services: string[] = (content.inquiries || [])
@@ -2244,8 +2291,7 @@ export default function Admin() {
                     {(searchQuery || statusFilter !== "all" || priorityFilter !== "all" || leadServiceFilter !== "all") && (
                       <button
                         type="button"
-                        className="adm-btn adm-btn-sec"
-                        style={{ height: "38px", padding: "0 12px", fontSize: "0.82rem", whiteSpace: "nowrap" }}
+                        className="admin-filter-reset-btn"
                         onClick={() => {
                           setSearchQuery("");
                           setStatusFilter("all");
@@ -2277,164 +2323,170 @@ export default function Admin() {
                 ) : (
                   <>
                     <div className="admin-candidate-list">
-                      {paginatedInquiries.map((inq: any) => (
-                      <div key={inq.id} className={`admin-candidate-card status-${inq.status || "new"}`}>
-                        <div className="admin-candidate-header">
-                          <div className="admin-candidate-profile">
-                            <div className="admin-candidate-avatar" style={{ background: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)" }}>
-                              {inq.name.charAt(0).toUpperCase()}
+                      {paginatedInquiries.map((inq: any) => {
+                        const leadRefId = `KE-LEAD-2026-${String(inq.id).padStart(4, "0")}`;
+                        return (
+                          <div key={inq.id} className={`admin-candidate-card status-${inq.status || "new"}`}>
+                            <div className="admin-candidate-header">
+                              <div className="admin-candidate-profile">
+                                <div className="admin-candidate-avatar" style={{ background: "linear-gradient(135deg, #0284c7 0%, #0369a1 100%)" }}>
+                                  {inq.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="admin-candidate-main-info">
+                                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "4px" }}>
+                                    <span className="admin-candidate-name">{inq.name}</span>
+                                    <span className="admin-ref-id-badge">{leadRefId}</span>
+                                    {inq.company && <span style={{ color: "var(--adm-text-muted)", fontSize: "0.88rem", fontWeight: 600 }}>· {inq.company}</span>}
+                                    {inq.service && <span className="admin-candidate-role-pill">{inq.service}</span>}
+                                    <span className={`admin-badge-priority ${inq.priority || "medium"}`}>
+                                      {inq.priority === "hot" && "🔥 Hot"}
+                                      {inq.priority === "medium" && "⚡ Medium"}
+                                      {inq.priority === "low" && "❄️ Low"}
+                                      {!inq.priority && "⚡ Normal"}
+                                    </span>
+                                  </div>
+                                  <div className="admin-candidate-meta">
+                                    {inq.email && (
+                                      <span className="admin-candidate-meta-item">
+                                        <Mail size={13} />
+                                        <a href={`mailto:${inq.email}?subject=Re: Your Project Inquiry with KairoEdge Technologies`}>{inq.email}</a>
+                                      </span>
+                                    )}
+                                    {inq.phone && (
+                                      <span className="admin-candidate-meta-item">
+                                        <Phone size={13} />
+                                        <a href={`tel:${inq.phone.replace(/\s+/g, "")}`}>{inq.phone}</a>
+                                      </span>
+                                    )}
+                                    <span className="admin-candidate-meta-item">
+                                      <Clock size={13} />
+                                      <span>Received: {inq.created_at ? new Date(inq.created_at).toLocaleDateString() : "Recent"}</span>
+                                    </span>
+                                    {inq.source && (
+                                      <span className="admin-candidate-meta-item" style={{ color: "var(--adm-cyan)" }}>
+                                        Source: {inq.source}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="admin-candidate-status-group">
+                                <select
+                                  className={`admin-status-dropdown ${inq.status || "new"}`}
+                                  value={inq.status || "new"}
+                                  onChange={(e) => handleUpdateInquiryStatus(inq.id, e.target.value)}
+                                >
+                                  <option value="new">● New Lead</option>
+                                  <option value="contacted">● Contacted</option>
+                                  <option value="in_discussion">● In Discussion</option>
+                                  <option value="proposal_sent">● Proposal Sent</option>
+                                  <option value="negotiation">● Negotiation</option>
+                                  <option value="won">● Won / Converted</option>
+                                  <option value="lost">● Closed / Lost</option>
+                                </select>
+                              </div>
                             </div>
-                            <div className="admin-candidate-main-info">
-                              <h3>
-                                <span>{inq.name}</span>
-                                {inq.company && <span style={{ color: "var(--adm-text-muted)", fontSize: "0.95rem", fontWeight: 500 }}>· {inq.company}</span>}
-                                {inq.service && <span className="admin-candidate-role-pill">{inq.service}</span>}
-                                <span className={`admin-badge-priority ${inq.priority || "medium"}`}>
-                                  {inq.priority === "hot" && "🔥 Hot"}
-                                  {inq.priority === "medium" && "⚡ Medium"}
-                                  {inq.priority === "low" && "❄️ Low"}
-                                  {!inq.priority && "⚡ Normal"}
-                                </span>
-                              </h3>
-                              <div className="admin-candidate-meta">
-                                {inq.email && (
-                                  <span className="admin-candidate-meta-item">
-                                    <Mail size={13} />
-                                    <a href={`mailto:${inq.email}?subject=Re: Your Project Inquiry with KairoEdge Technologies`}>{inq.email}</a>
+
+                            {/* Financial & Follow-up Strip */}
+                            {(inq.budget || inq.follow_up_date) && (
+                              <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", padding: "8px 12px", background: "rgba(3, 14, 24, 0.4)", borderRadius: "6px", fontSize: "0.82rem" }}>
+                                {inq.budget && (
+                                  <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", color: "var(--adm-text-bright)" }}>
+                                    <DollarSign size={14} color="#10b981" />
+                                    <b>Est. Budget:</b> {inq.budget}
                                   </span>
                                 )}
-                                {inq.phone && (
-                                  <span className="admin-candidate-meta-item">
-                                    <Phone size={13} />
-                                    <a href={`tel:${inq.phone.replace(/\s+/g, "")}`}>{inq.phone}</a>
-                                  </span>
-                                )}
-                                <span className="admin-candidate-meta-item">
-                                  <Clock size={13} />
-                                  <span>{inq.created_at ? new Date(inq.created_at).toLocaleDateString() : "Recent"}</span>
-                                </span>
-                                {inq.source && (
-                                  <span className="admin-candidate-meta-item" style={{ color: "var(--adm-cyan)" }}>
-                                    Source: {inq.source}
+                                {inq.follow_up_date && (
+                                  <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", color: "#fbbf24" }}>
+                                    <Calendar size={14} />
+                                    <b>Next Follow-up:</b> {inq.follow_up_date}
                                   </span>
                                 )}
                               </div>
+                            )}
+
+                            {/* Project Scope Message */}
+                            <div className="admin-candidate-pitch" style={{ borderLeftColor: "var(--adm-primary)" }}>
+                              <b style={{ color: "var(--adm-text-bright)", display: "block", marginBottom: "4px", fontSize: "0.82rem" }}>
+                                Project Requirements & Scope:
+                              </b>
+                              <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{inq.message}</p>
+                            </div>
+
+                            {/* Compact Lead Notes */}
+                            <div className="admin-compact-notes">
+                              <span className="notes-label">Lead Notes:</span>
+                              <input
+                                type="text"
+                                className="admin-compact-notes-input"
+                                placeholder="Add follow-up notes, proposal terms, or client requirements..."
+                                defaultValue={inq.notes || ""}
+                                onBlur={(e) => {
+                                  if (e.target.value !== (inq.notes || "")) {
+                                    handleUpdateInquiryStatus(inq.id, inq.status || "new", e.target.value);
+                                  }
+                                }}
+                              />
+                            </div>
+
+                            {/* Actions */}
+                            <div className="admin-candidate-actions">
+                              <div className="admin-candidate-action-links">
+                                {inq.phone && (
+                                  <button
+                                    type="button"
+                                    className="adm-btn adm-btn-whatsapp adm-btn-sm"
+                                    onClick={() =>
+                                      openWhatsApp(
+                                        inq.phone,
+                                        `Hello ${inq.name}, thank you for reaching out to KairoEdge Technologies regarding ${inq.service || "software engineering"}. How can we assist you today?`
+                                      )
+                                    }
+                                  >
+                                    <MessageCircle size={14} />
+                                    <span>WhatsApp Chat</span>
+                                  </button>
+                                )}
+                                {inq.email && (
+                                  <a
+                                    href={`mailto:${inq.email}?subject=Re: Your Project Inquiry with KairoEdge Technologies`}
+                                    className="adm-btn adm-btn-sec adm-btn-sm"
+                                  >
+                                    <Mail size={14} />
+                                    <span>Email Reply</span>
+                                  </a>
+                                )}
+                                {inq.phone && (
+                                  <a
+                                    href={`tel:${inq.phone.replace(/\s+/g, "")}`}
+                                    className="adm-btn adm-btn-sec adm-btn-sm"
+                                  >
+                                    <Phone size={14} />
+                                    <span>Call</span>
+                                  </a>
+                                )}
+                                <button
+                                  type="button"
+                                  className="adm-btn adm-btn-sec adm-btn-sm"
+                                  onClick={() => setEditingLead(inq)}
+                                >
+                                  <Edit3 size={14} />
+                                  <span>Edit Details</span>
+                                </button>
+                              </div>
+
+                              <button
+                                className="adm-btn adm-btn-danger adm-btn-sm"
+                                onClick={() => handleDeleteInquiry(inq.id)}
+                                title="Move to Recycle Bin"
+                              >
+                                <Trash2 size={14} />
+                              </button>
                             </div>
                           </div>
-
-                          <div className="admin-candidate-status-group">
-                            <select
-                              className={`admin-status-dropdown ${inq.status || "new"}`}
-                              value={inq.status || "new"}
-                              onChange={(e) => handleUpdateInquiryStatus(inq.id, e.target.value)}
-                            >
-                              <option value="new">● New Lead</option>
-                              <option value="contacted">● Contacted</option>
-                              <option value="in_discussion">● In Discussion</option>
-                              <option value="proposal_sent">● Proposal Sent</option>
-                              <option value="negotiation">● Negotiation</option>
-                              <option value="won">● Won / Converted</option>
-                              <option value="lost">● Closed / Lost</option>
-                            </select>
-                          </div>
-                        </div>
-
-                        {/* Financial & Follow-up Strip */}
-                        {(inq.budget || inq.follow_up_date) && (
-                          <div style={{ display: "flex", gap: "16px", flexWrap: "wrap", padding: "8px 12px", background: "rgba(3, 14, 24, 0.4)", borderRadius: "6px", fontSize: "0.82rem" }}>
-                            {inq.budget && (
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", color: "var(--adm-text-bright)" }}>
-                                <DollarSign size={14} color="#10b981" />
-                                <b>Est. Budget:</b> {inq.budget}
-                              </span>
-                            )}
-                            {inq.follow_up_date && (
-                              <span style={{ display: "inline-flex", alignItems: "center", gap: "5px", color: "#fbbf24" }}>
-                                <Calendar size={14} />
-                                <b>Next Follow-up:</b> {inq.follow_up_date}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        {/* Project Scope Message */}
-                        <div className="admin-candidate-pitch" style={{ borderLeftColor: "var(--adm-primary)" }}>
-                          <b style={{ color: "var(--adm-text-bright)", display: "block", marginBottom: "4px", fontSize: "0.82rem" }}>
-                            Project Requirements & Scope:
-                          </b>
-                          <p style={{ whiteSpace: "pre-wrap" }}>{inq.message}</p>
-                        </div>
-
-                        {/* Notes */}
-                        <div className="admin-notes-box">
-                          <textarea
-                            className="admin-notes-textarea"
-                            placeholder="Client requirements notes, proposal terms, next steps..."
-                            defaultValue={inq.notes || ""}
-                            onBlur={(e) => {
-                              if (e.target.value !== (inq.notes || "")) {
-                                handleUpdateInquiryStatus(inq.id, inq.status || "new", e.target.value);
-                              }
-                            }}
-                          />
-                        </div>
-
-                        {/* Actions */}
-                        <div className="admin-candidate-actions">
-                          <div className="admin-candidate-action-links">
-                            {inq.phone && (
-                              <button
-                                type="button"
-                                className="adm-btn adm-btn-whatsapp adm-btn-sm"
-                                onClick={() =>
-                                  openWhatsApp(
-                                    inq.phone,
-                                    `Hello ${inq.name}, thank you for reaching out to KairoEdge Technologies regarding ${inq.service || "software engineering"}. How can we assist you today?`
-                                  )
-                                }
-                              >
-                                <MessageCircle size={14} />
-                                <span>WhatsApp Chat</span>
-                              </button>
-                            )}
-                            {inq.email && (
-                              <a
-                                href={`mailto:${inq.email}?subject=Re: Your Project Inquiry with KairoEdge Technologies`}
-                                className="adm-btn adm-btn-sec adm-btn-sm"
-                              >
-                                <Mail size={14} />
-                                <span>Email Reply</span>
-                              </a>
-                            )}
-                            {inq.phone && (
-                              <a
-                                href={`tel:${inq.phone.replace(/\s+/g, "")}`}
-                                className="adm-btn adm-btn-sec adm-btn-sm"
-                              >
-                                <Phone size={14} />
-                                <span>Call</span>
-                              </a>
-                            )}
-                            <button
-                              type="button"
-                              className="adm-btn adm-btn-sec adm-btn-sm"
-                              onClick={() => setEditingLead(inq)}
-                            >
-                              <Edit3 size={14} />
-                              <span>Edit Details</span>
-                            </button>
-                          </div>
-
-                          <button
-                            className="adm-btn adm-btn-danger adm-btn-sm"
-                            onClick={() => handleDeleteInquiry(inq.id)}
-                            title="Move to Recycle Bin"
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                        );
+                      })}
                     </div>
                     <PaginationControls
                       currentPage={currentPage}
@@ -2566,8 +2618,7 @@ export default function Admin() {
                     {(searchQuery || statusFilter !== "all" || roleFilter !== "all" || jobExperienceFilter !== "all") && (
                       <button
                         type="button"
-                        className="adm-btn adm-btn-sec"
-                        style={{ height: "38px", padding: "0 12px", fontSize: "0.82rem", whiteSpace: "nowrap" }}
+                        className="admin-filter-reset-btn"
                         onClick={() => {
                           setSearchQuery("");
                           setStatusFilter("all");
@@ -2577,7 +2628,7 @@ export default function Admin() {
                         title="Clear all filters"
                       >
                         <X size={14} />
-                        <span>Reset</span>
+                        <span>Reset Filters</span>
                       </button>
                     )}
                   </div>
@@ -2599,120 +2650,131 @@ export default function Admin() {
                 ) : (
                   <>
                     <div className="admin-candidate-list">
-                      {paginatedJobApps.map((cand: any) => (
-                      <div key={cand.id} className={`admin-candidate-card status-${cand.status || "new"}`}>
-                        <div className="admin-candidate-header">
-                          <div className="admin-candidate-profile">
-                            <div className="admin-candidate-avatar">
-                              {cand.name.charAt(0).toUpperCase()}
+                      {paginatedJobApps.map((cand: any) => {
+                        const refId = `KE-JOB-2026-${String(cand.id).padStart(4, "0")}`;
+                        return (
+                          <div key={cand.id} className={`admin-candidate-card status-${cand.status || "new"}`}>
+                            <div className="admin-candidate-header">
+                              <div className="admin-candidate-profile">
+                                <div className="admin-candidate-avatar">
+                                  {cand.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="admin-candidate-main-info">
+                                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "4px" }}>
+                                    <span className="admin-candidate-name">{cand.name}</span>
+                                    <span className="admin-ref-id-badge">{refId}</span>
+                                    <span className="admin-candidate-role-pill">
+                                      <Briefcase size={12} style={{ display: "inline-block", marginRight: "4px" }} />
+                                      {cand.role_title}
+                                    </span>
+                                    {cand.rating > 0 && (
+                                      <span style={{ color: "#f59e0b", fontSize: "0.85rem", display: "inline-flex", alignItems: "center" }}>
+                                        {"★".repeat(cand.rating)}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="admin-candidate-meta">
+                                    <span className="admin-candidate-meta-item">
+                                      <Mail size={13} />
+                                      <a href={`mailto:${cand.email}?subject=Regarding your application for ${encodeURIComponent(cand.role_title)} at KairoEdge Technologies`}>
+                                        {cand.email}
+                                      </a>
+                                    </span>
+                                    {cand.phone && (
+                                      <span className="admin-candidate-meta-item">
+                                        <Phone size={13} />
+                                        <a href={`tel:${cand.phone.replace(/\s+/g, "")}`}>{cand.phone}</a>
+                                      </span>
+                                    )}
+                                    <span className="admin-candidate-meta-item">
+                                      <Clock size={13} />
+                                      <span>Applied: {cand.created_at ? new Date(cand.created_at).toLocaleDateString() : "Recent"}</span>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="admin-candidate-status-group">
+                                <select
+                                  className={`admin-status-dropdown ${cand.status || "new"}`}
+                                  value={cand.status || "new"}
+                                  onChange={(e) => handleUpdateApplicationStatus(cand.id, e.target.value)}
+                                >
+                                  <option value="new">● New Application</option>
+                                  <option value="reviewing">● Reviewing</option>
+                                  <option value="shortlisted">● Shortlisted</option>
+                                  <option value="interviewed">● Interviewed</option>
+                                  <option value="offer_made">● Offer Made</option>
+                                  <option value="hired">● Hired</option>
+                                  <option value="rejected">● Rejected</option>
+                                </select>
+                              </div>
                             </div>
-                            <div className="admin-candidate-main-info">
-                              <h3>
-                                <span>{cand.name}</span>
-                                <span className="admin-candidate-role-pill">{cand.role_title}</span>
-                                {cand.rating > 0 && (
-                                  <span style={{ color: "#f59e0b", fontSize: "0.85rem", display: "inline-flex", alignItems: "center" }}>
-                                    {"★".repeat(cand.rating)}
-                                  </span>
-                                )}
-                              </h3>
-                              <div className="admin-candidate-meta">
-                                <span className="admin-candidate-meta-item">
-                                  <Mail size={13} />
-                                  <a href={`mailto:${cand.email}?subject=Regarding your application for ${encodeURIComponent(cand.role_title)} at KairoEdge Technologies`}>
-                                    {cand.email}
-                                  </a>
+
+                            {/* Experience & Professional Details Grid */}
+                            <div className="admin-candidate-details-grid">
+                              <div className="admin-detail-item">
+                                <span className="admin-detail-label">Experience</span>
+                                <span className="admin-detail-value" style={{ fontWeight: 700, color: "var(--adm-text-bright)" }}>
+                                  {cand.experience || "Fresher"}
                                 </span>
-                                {cand.phone && (
-                                  <span className="admin-candidate-meta-item">
-                                    <Phone size={13} />
-                                    <a href={`tel:${cand.phone.replace(/\s+/g, "")}`}>{cand.phone}</a>
-                                  </span>
-                                )}
-                                <span className="admin-candidate-meta-item">
-                                  <Clock size={13} />
-                                  <span>{cand.created_at ? new Date(cand.created_at).toLocaleDateString() : "Recent"}</span>
+                              </div>
+                              <div className="admin-detail-item">
+                                <span className="admin-detail-label">Current Company</span>
+                                <span className="admin-detail-value">{cand.current_company || "—"}</span>
+                              </div>
+                              <div className="admin-detail-item">
+                                <span className="admin-detail-label">Designation</span>
+                                <span className="admin-detail-value">{cand.current_designation || "—"}</span>
+                              </div>
+                              <div className="admin-detail-item">
+                                <span className="admin-detail-label">Notice Period</span>
+                                <span className="admin-detail-value">{cand.notice_period || "Immediate"}</span>
+                              </div>
+                              <div className="admin-detail-item">
+                                <span className="admin-detail-label">Expected CTC</span>
+                                <span className="admin-detail-value" style={{ color: "#0ea5e9", fontWeight: 700 }}>
+                                  {cand.expected_ctc || "—"}
                                 </span>
                               </div>
                             </div>
-                          </div>
 
-                          <div className="admin-candidate-status-group">
-                            <select
-                              className={`admin-status-dropdown ${cand.status || "new"}`}
-                              value={cand.status || "new"}
-                              onChange={(e) => handleUpdateApplicationStatus(cand.id, e.target.value)}
-                            >
-                              <option value="new">● New</option>
-                              <option value="reviewing">● Reviewing</option>
-                              <option value="shortlisted">● Shortlisted</option>
-                              <option value="interviewed">● Interviewed</option>
-                              <option value="offer_made">● Offer Made</option>
-                              <option value="hired">● Hired</option>
-                              <option value="rejected">● Rejected</option>
-                            </select>
-                          </div>
-                        </div>
+                            {/* Scheduled Interview Banner */}
+                            {cand.interview_date && (
+                              <div className="admin-interview-banner">
+                                <Calendar size={15} color="var(--adm-cyan)" />
+                                <span>Scheduled Interview: <b>{cand.interview_date}</b> ({cand.interview_mode || "Google Meet"})</span>
+                                {cand.salary_offered && (
+                                  <span style={{ marginLeft: "auto", color: "#10b981", fontWeight: 700 }}>Offer: {cand.salary_offered}</span>
+                                )}
+                              </div>
+                            )}
 
-                        {/* Experience & Professional Details Grid */}
-                        <div className="admin-candidate-details-grid">
-                          <div className="admin-detail-item">
-                            <span className="admin-detail-label">Experience</span>
-                            <span className="admin-detail-value">{cand.experience || "Fresher"}</span>
-                          </div>
-                          <div className="admin-detail-item">
-                            <span className="admin-detail-label">Current Company</span>
-                            <span className="admin-detail-value">{cand.current_company || "—"}</span>
-                          </div>
-                          <div className="admin-detail-item">
-                            <span className="admin-detail-label">Designation</span>
-                            <span className="admin-detail-value">{cand.current_designation || "—"}</span>
-                          </div>
-                          <div className="admin-detail-item">
-                            <span className="admin-detail-label">Notice Period</span>
-                            <span className="admin-detail-value">{cand.notice_period || "Immediate"}</span>
-                          </div>
-                          <div className="admin-detail-item">
-                            <span className="admin-detail-label">Expected CTC</span>
-                            <span className="admin-detail-value">{cand.expected_ctc || "—"}</span>
-                          </div>
-                        </div>
+                            {/* Candidate Pitch / Note */}
+                            {cand.message && (
+                              <div className="admin-candidate-pitch">
+                                <b style={{ color: "var(--adm-text-bright)", display: "block", marginBottom: "3px", fontSize: "0.8rem" }}>
+                                  Candidate Pitch / Note:
+                                </b>
+                                <span>{cand.message}</span>
+                              </div>
+                            )}
 
-                        {/* Interview info if set */}
-                        {cand.interview_date && (
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", background: "rgba(14, 165, 233, 0.12)", border: "1px solid rgba(56, 189, 248, 0.25)", borderRadius: "6px", fontSize: "0.82rem" }}>
-                            <Calendar size={14} color="var(--adm-cyan)" />
-                            <span>Scheduled Interview: <b>{cand.interview_date}</b> ({cand.interview_mode || "Google Meet"})</span>
-                            {cand.salary_offered && <span style={{ marginLeft: "auto", color: "#10b981", fontWeight: 700 }}>Offer: {cand.salary_offered}</span>}
-                          </div>
-                        )}
-
-                        {/* Cover Note */}
-                        {cand.message && (
-                          <div className="admin-candidate-pitch">
-                            <b style={{ color: "var(--adm-text-bright)", display: "block", marginBottom: "3px", fontSize: "0.8rem" }}>
-                              Candidate Pitch / Note:
-                            </b>
-                            <span>{cand.message}</span>
-                          </div>
-                        )}
-
-                        {/* Inline Recruiter Remarks */}
-                        <div className="admin-notes-box">
-                          <div className="admin-notes-header">
-                            <span>Recruiter Remarks & Next Steps</span>
-                          </div>
-                          <textarea
-                            className="admin-notes-textarea"
-                            placeholder="Add interview notes, assessment feedback, or salary discussion..."
-                            defaultValue={cand.notes || ""}
-                            onBlur={(e) => {
-                              if (e.target.value !== (cand.notes || "")) {
-                                handleUpdateApplicationStatus(cand.id, cand.status || "new", e.target.value);
-                              }
-                            }}
-                          />
-                        </div>
+                            {/* Compact Recruiter Notes */}
+                            <div className="admin-compact-notes">
+                              <span className="notes-label">Recruiter Notes:</span>
+                              <input
+                                type="text"
+                                className="admin-compact-notes-input"
+                                placeholder="Click to add recruiter notes, interview feedback, or salary discussion..."
+                                defaultValue={cand.notes || ""}
+                                onBlur={(e) => {
+                                  if (e.target.value !== (cand.notes || "")) {
+                                    handleUpdateApplicationStatus(cand.id, cand.status || "new", e.target.value);
+                                  }
+                                }}
+                              />
+                            </div>
 
                         {/* Actions Footer */}
                         <div className="admin-candidate-actions">
@@ -2819,8 +2881,9 @@ export default function Admin() {
                           </div>
                         </div>
                       </div>
-                    ))}
-                    </div>
+                    );
+                  })}
+                  </div>
                     <PaginationControls
                       currentPage={currentPage}
                       totalItems={jobApplications.length}
@@ -2982,8 +3045,7 @@ export default function Admin() {
                     {(searchQuery || statusFilter !== "all" || roleFilter !== "all" || studyYearFilter !== "all" || internCollegeFilter !== "all" || internDistrictFilter !== "all") && (
                       <button
                         type="button"
-                        className="adm-btn adm-btn-sec"
-                        style={{ height: "38px", padding: "0 12px", fontSize: "0.82rem", whiteSpace: "nowrap" }}
+                        className="admin-filter-reset-btn"
                         onClick={() => {
                           setSearchQuery("");
                           setStatusFilter("all");
@@ -2995,7 +3057,7 @@ export default function Admin() {
                         title="Clear all filters"
                       >
                         <X size={14} />
-                        <span>Reset</span>
+                        <span>Reset Filters</span>
                       </button>
                     )}
                   </div>
@@ -3017,125 +3079,134 @@ export default function Admin() {
                 ) : (
                   <>
                     <div className="admin-candidate-list">
-                      {paginatedInternApps.map((cand: any) => (
-                      <div key={cand.id} className={`admin-candidate-card status-${cand.status || "new"}`}>
-                        <div className="admin-candidate-header">
-                          <div className="admin-candidate-profile">
-                            <div className="admin-candidate-avatar" style={{ background: "linear-gradient(135deg, #0ea5e9 0%, #0369a1 100%)" }}>
-                              {cand.name.charAt(0).toUpperCase()}
-                            </div>
-                            <div className="admin-candidate-main-info">
-                              <h3>
-                                <span>{cand.name}</span>
-                                <span className="admin-candidate-role-pill" style={{ background: "rgba(14, 165, 233, 0.15)", color: "#38bdf8" }}>
-                                  {cand.role_title}
-                                </span>
-                                {cand.rating > 0 && (
-                                  <span style={{ color: "#f59e0b", fontSize: "0.85rem" }}>
-                                    {"★".repeat(cand.rating)}
-                                  </span>
-                                )}
-                              </h3>
-                              <div className="admin-candidate-meta">
-                                <span className="admin-candidate-meta-item">
-                                  <Mail size={13} />
-                                  <a href={`mailto:${cand.email}?subject=Regarding your application for ${encodeURIComponent(cand.role_title)} at KairoEdge Technologies`}>
-                                    {cand.email}
-                                  </a>
-                                </span>
-                                {cand.phone && (
-                                  <span className="admin-candidate-meta-item">
-                                    <Phone size={13} />
-                                    <a href={`tel:${cand.phone.replace(/\s+/g, "")}`}>{cand.phone}</a>
-                                  </span>
-                                )}
-                                <span className="admin-candidate-meta-item">
-                                  <Clock size={13} />
-                                  <span>{cand.created_at ? new Date(cand.created_at).toLocaleDateString() : "Recent"}</span>
-                                </span>
+                      {paginatedInternApps.map((cand: any) => {
+                        const refId = `KE-INT-2026-${String(cand.id).padStart(4, "0")}`;
+                        return (
+                          <div key={cand.id} className={`admin-candidate-card status-${cand.status || "new"}`}>
+                            <div className="admin-candidate-header">
+                              <div className="admin-candidate-profile">
+                                <div className="admin-candidate-avatar intern-avatar">
+                                  {cand.name.charAt(0).toUpperCase()}
+                                </div>
+                                <div className="admin-candidate-main-info">
+                                  <div style={{ display: "flex", alignItems: "center", gap: "8px", flexWrap: "wrap", marginBottom: "4px" }}>
+                                    <span className="admin-candidate-name">{cand.name}</span>
+                                    <span className="admin-ref-id-badge">{refId}</span>
+                                    <span className="admin-candidate-role-pill intern-pill">
+                                      <GraduationCap size={13} />
+                                      {cand.role_title}
+                                    </span>
+                                    {cand.rating > 0 && (
+                                      <span style={{ color: "#f59e0b", fontSize: "0.85rem" }}>
+                                        {"★".repeat(cand.rating)}
+                                      </span>
+                                    )}
+                                  </div>
+                                  <div className="admin-candidate-meta">
+                                    <span className="admin-candidate-meta-item">
+                                      <Mail size={13} />
+                                      <a href={`mailto:${cand.email}?subject=Regarding your application for ${encodeURIComponent(cand.role_title)} at KairoEdge Technologies`}>
+                                        {cand.email}
+                                      </a>
+                                    </span>
+                                    {cand.phone && (
+                                      <span className="admin-candidate-meta-item">
+                                        <Phone size={13} />
+                                        <a href={`tel:${cand.phone.replace(/\s+/g, "")}`}>{cand.phone}</a>
+                                      </span>
+                                    )}
+                                    <span className="admin-candidate-meta-item">
+                                      <Clock size={13} />
+                                      <span>Applied: {cand.created_at ? new Date(cand.created_at).toLocaleDateString() : "Recent"}</span>
+                                    </span>
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="admin-candidate-status-group">
+                                <select
+                                  className={`admin-status-dropdown ${cand.status || "new"}`}
+                                  value={cand.status || "new"}
+                                  onChange={(e) => handleUpdateApplicationStatus(cand.id, e.target.value)}
+                                >
+                                  <option value="new">● New Application</option>
+                                  <option value="reviewing">● Reviewing</option>
+                                  <option value="shortlisted">● Shortlisted</option>
+                                  <option value="interviewed">● Interviewed</option>
+                                  <option value="hired">● Selected / Joined</option>
+                                  <option value="rejected">● Rejected</option>
+                                </select>
                               </div>
                             </div>
-                          </div>
 
-                          <div className="admin-candidate-status-group">
-                            <select
-                              className={`admin-status-dropdown ${cand.status || "new"}`}
-                              value={cand.status || "new"}
-                              onChange={(e) => handleUpdateApplicationStatus(cand.id, e.target.value)}
-                            >
-                              <option value="new">● New</option>
-                              <option value="reviewing">● Reviewing</option>
-                              <option value="shortlisted">● Shortlisted</option>
-                              <option value="interviewed">● Interviewed</option>
-                              <option value="hired">● Selected / Joined</option>
-                              <option value="rejected">● Rejected</option>
-                            </select>
-                          </div>
-                        </div>
+                            {/* Distinct College & Academic Block */}
+                            <div className="admin-candidate-info-blocks">
+                              <div className="admin-info-block-college">
+                                <div className="admin-info-block-icon">
+                                  <Building2 size={18} color="var(--adm-cyan)" />
+                                </div>
+                                <div className="admin-info-block-content">
+                                  <div className="admin-info-block-title">College & Campus Location</div>
+                                  <div className="admin-info-block-main">
+                                    <strong>{cand.college || "Direct Student Application"}</strong>
+                                    {cand.district && (
+                                      <span className="admin-district-chip">
+                                        <MapPin size={11} /> {cand.district}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
 
-                        {/* Academic Grid */}
-                        <div className="admin-candidate-details-grid">
-                          <div className="admin-detail-item">
-                            <span className="admin-detail-label">College & District</span>
-                            <span className="admin-detail-value">
-                              {cand.college || "—"}
-                              {cand.district && (
-                                <span className="admin-table-badge cyan" style={{ marginLeft: "6px", fontSize: "0.72rem" }}>
-                                  {cand.district}
-                                </span>
-                              )}
-                            </span>
-                          </div>
-                          <div className="admin-detail-item">
-                            <span className="admin-detail-label">Degree</span>
-                            <span className="admin-detail-value">{cand.degree || "—"}</span>
-                          </div>
-                          <div className="admin-detail-item">
-                            <span className="admin-detail-label">Branch / Specialization</span>
-                            <span className="admin-detail-value">{cand.branch || "—"}</span>
-                          </div>
-                          <div className="admin-detail-item">
-                            <span className="admin-detail-label">Year of Study</span>
-                            <span className="admin-detail-value" style={{ color: "var(--adm-cyan)", fontWeight: 700 }}>
-                              {cand.graduation_year || "—"}
-                            </span>
-                          </div>
-                        </div>
+                              <div className="admin-info-block-academics">
+                                <div className="admin-academic-chip">
+                                  <span className="chip-label">Degree:</span>
+                                  <span className="chip-value">{cand.degree || "—"}</span>
+                                </div>
+                                <div className="admin-academic-chip">
+                                  <span className="chip-label">Branch:</span>
+                                  <span className="chip-value">{cand.branch || "—"}</span>
+                                </div>
+                                <div className="admin-academic-chip highlight">
+                                  <span className="chip-label">Year of Study:</span>
+                                  <span className="chip-value">{cand.graduation_year || "—"}</span>
+                                </div>
+                              </div>
+                            </div>
 
-                        {/* Scheduled interview */}
-                        {cand.interview_date && (
-                          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 12px", background: "rgba(14, 165, 233, 0.12)", border: "1px solid rgba(56, 189, 248, 0.25)", borderRadius: "6px", fontSize: "0.82rem" }}>
-                            <Calendar size={14} color="var(--adm-cyan)" />
-                            <span>Scheduled Review / Task: <b>{cand.interview_date}</b> ({cand.interview_mode || "Online"})</span>
-                          </div>
-                        )}
+                            {/* Scheduled interview banner */}
+                            {cand.interview_date && (
+                              <div className="admin-interview-banner">
+                                <Calendar size={15} color="var(--adm-cyan)" />
+                                <span>Scheduled Review / Task: <b>{cand.interview_date}</b> ({cand.interview_mode || "Online"})</span>
+                              </div>
+                            )}
 
-                        {/* Pitch */}
-                        {cand.message && (
-                          <div className="admin-candidate-pitch">
-                            <b style={{ color: "var(--adm-text-bright)", display: "block", marginBottom: "3px", fontSize: "0.8rem" }}>
-                              Cover Note / Motivation:
-                            </b>
-                            <span>{cand.message}</span>
-                          </div>
-                        )}
+                            {/* Pitch / Cover Note */}
+                            {cand.message && (
+                              <div className="admin-candidate-pitch">
+                                <b style={{ color: "var(--adm-text-bright)", display: "block", marginBottom: "3px", fontSize: "0.8rem" }}>
+                                  Cover Note / Motivation:
+                                </b>
+                                <span>{cand.message}</span>
+                              </div>
+                            )}
 
-                        {/* Remarks Box */}
-                        <div className="admin-notes-box">
-                          <div className="admin-notes-header">
-                            <span>Mentor / Recruiter Remarks</span>
-                          </div>
-                          <textarea
-                            className="admin-notes-textarea"
-                            placeholder="Add evaluation comments, interview feedback, or track fit..."
-                            defaultValue={cand.notes || ""}
-                            onBlur={(e) => {
-                              if (e.target.value !== (cand.notes || "")) {
-                                handleUpdateApplicationStatus(cand.id, cand.status || "new", e.target.value);
-                              }
-                            }}
-                          />
-                        </div>
+                            {/* Compact Recruiter Notes */}
+                            <div className="admin-compact-notes">
+                              <span className="notes-label">Mentor Remarks:</span>
+                              <input
+                                type="text"
+                                className="admin-compact-notes-input"
+                                placeholder="Click to add mentor remarks, evaluation feedback, or batch status..."
+                                defaultValue={cand.notes || ""}
+                                onBlur={(e) => {
+                                  if (e.target.value !== (cand.notes || "")) {
+                                    handleUpdateApplicationStatus(cand.id, cand.status || "new", e.target.value);
+                                  }
+                                }}
+                              />
+                            </div>
 
                         {/* Actions */}
                         <div className="admin-candidate-actions">
@@ -3242,8 +3313,9 @@ export default function Admin() {
                           </div>
                         </div>
                       </div>
-                    ))}
-                    </div>
+                    );
+                  })}
+                  </div>
                     <PaginationControls
                       currentPage={currentPage}
                       totalItems={internApplications.length}
@@ -4037,8 +4109,7 @@ export default function Admin() {
                     {(searchQuery || collegeCityFilter !== "all" || collegeStatusFilter !== "all") && (
                       <button
                         type="button"
-                        className="adm-btn adm-btn-sec"
-                        style={{ height: "38px", padding: "0 12px", fontSize: "0.82rem", whiteSpace: "nowrap" }}
+                        className="admin-filter-reset-btn"
                         onClick={() => {
                           setSearchQuery("");
                           setCollegeCityFilter("all");
@@ -4047,7 +4118,7 @@ export default function Admin() {
                         title="Clear all filters"
                       >
                         <X size={14} />
-                        <span>Reset</span>
+                        <span>Reset Filters</span>
                       </button>
                     )}
                   </div>
@@ -4085,7 +4156,7 @@ export default function Admin() {
                             );
                             return (
                               <tr key={col.id}>
-                                <td style={{ color: "var(--adm-text-faint)", fontFamily: "monospace" }}>#{col.id}</td>
+                                <td><span className="admin-ref-id-badge">#COL-{String(col.id).padStart(4, "0")}</span></td>
                                 <td style={{ fontWeight: 600, color: "var(--adm-text-bright)" }}>{col.name}</td>
                                 <td><span className="admin-table-badge cyan">{col.code || "—"}</span></td>
                                 <td><span className="admin-table-badge slate">{col.district || col.city || "Pune"}</span></td>
@@ -4212,8 +4283,7 @@ export default function Admin() {
                     {genericSearchQuery && (
                       <button
                         type="button"
-                        className="adm-btn adm-btn-sec"
-                        style={{ height: "38px", padding: "0 12px", fontSize: "0.82rem", whiteSpace: "nowrap" }}
+                        className="admin-filter-reset-btn"
                         onClick={() => setGenericSearchQuery("")}
                         title="Clear search"
                       >
@@ -4245,7 +4315,7 @@ export default function Admin() {
                         {filteredGenericItems.length > 0 ? (
                           paginatedGenericItems.map((item: any) => (
                             <tr key={item.id}>
-                              <td style={{ color: "var(--adm-text-faint)", fontFamily: "monospace" }}>#{item.id}</td>
+                              <td><span className="admin-ref-id-badge">#{String(item.id).padStart(3, "0")}</span></td>
                               {tableSchemas[activeSection].fields.slice(0, 4).map((f) => {
                                 const val = item[f.name];
                                 if (f.type === "image") {
@@ -4448,8 +4518,7 @@ export default function Admin() {
                     {(subadminSearchQuery || subadminRoleFilter !== "all") && (
                       <button
                         type="button"
-                        className="adm-btn adm-btn-sec"
-                        style={{ height: "38px", padding: "0 12px", fontSize: "0.82rem", whiteSpace: "nowrap" }}
+                        className="admin-filter-reset-btn"
                         onClick={() => {
                           setSubadminSearchQuery("");
                           setSubadminRoleFilter("all");
@@ -4457,7 +4526,7 @@ export default function Admin() {
                         title="Clear all filters"
                       >
                         <X size={14} />
-                        <span>Reset</span>
+                        <span>Reset Filters</span>
                       </button>
                     )}
                   </div>
@@ -4473,6 +4542,7 @@ export default function Admin() {
                     <table className="admin-table">
                       <thead>
                         <tr>
+                          <th>ID</th>
                           <th>Username</th>
                           <th>Email</th>
                           <th>Assigned Role</th>
@@ -4486,6 +4556,7 @@ export default function Admin() {
                         {filteredSubadmins.length > 0 ? (
                           paginatedSubadmins.map((sub: any) => (
                             <tr key={sub.id}>
+                              <td><span className="admin-ref-id-badge">#ADM-{String(sub.id).padStart(3, "0")}</span></td>
                               <td style={{ fontWeight: 600, color: "var(--adm-text-bright)" }}>{sub.username}</td>
                               <td>{sub.email}</td>
                               <td><span className="admin-table-badge cyan">{sub.role}</span></td>
@@ -4542,7 +4613,7 @@ export default function Admin() {
                           ))
                         ) : (
                           <tr>
-                            <td colSpan={7} style={{ textAlign: "center", padding: "40px", color: "var(--adm-text-muted)" }}>
+                            <td colSpan={8} style={{ textAlign: "center", padding: "40px", color: "var(--adm-text-muted)" }}>
                               No sub-admin accounts match your search.
                             </td>
                           </tr>
@@ -5242,7 +5313,7 @@ export default function Admin() {
           ========================================================================== */}
       {editingTable && (
         <div className="admin-modal-backdrop" onClick={() => setEditingTable(null)}>
-          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+          <div className={`admin-modal ${editingTable === "colleges" ? "wide" : ""}`} onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header">
               <h2>
                 {editingItem ? "Edit" : "Create"}{" "}
@@ -5255,127 +5326,209 @@ export default function Admin() {
 
             <form onSubmit={handleSaveItem}>
               <div className="admin-modal-body">
-                {(tableSchemas[editingTable]?.fields || []).map((field) => (
-                  <div key={field.name} className="admin-field-group">
-                    <label className="admin-field-label">
-                      <span>{field.label}</span>
-                      {field.hint && <small style={{ color: "var(--adm-text-faint)", fontWeight: 400 }}>{field.hint}</small>}
-                    </label>
-
-                    {/* Text Input */}
-                    {field.type === "text" && (
+                {editingTable === "colleges" ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+                    <div className="admin-field-group">
+                      <label className="admin-field-label">
+                        <span>College / Institute Full Name</span>
+                        <small style={{ color: "var(--adm-text-faint)", fontWeight: 400 }}>Official full name of the engineering college or university campus</small>
+                      </label>
                       <input
                         type="text"
                         className="admin-input no-icon"
-                        value={itemFormData[field.name] || ""}
-                        onChange={(e) => setItemFormData({ ...itemFormData, [field.name]: e.target.value })}
-                        required={field.name === "title" || field.name === "name"}
+                        placeholder="e.g., Amrutvahini College of Engineering, Sangamner"
+                        value={itemFormData.name || ""}
+                        onChange={(e) => setItemFormData({ ...itemFormData, name: e.target.value })}
+                        required
                       />
-                    )}
+                    </div>
 
-                    {/* Select Dropdown */}
-                    {field.type === "select" && (
-                      <select
-                        className="admin-input no-icon"
-                        value={itemFormData[field.name] || (field.options?.[0] || "")}
-                        onChange={(e) => setItemFormData({ ...itemFormData, [field.name]: e.target.value })}
-                        required={field.name === "district"}
-                        style={{ height: "42px", cursor: "pointer" }}
-                      >
-                        {(field.options || []).map((opt: string) => (
-                          <option key={opt} value={opt}>
-                            {opt}
-                          </option>
-                        ))}
-                      </select>
-                    )}
-
-                    {/* Number Input */}
-                    {field.type === "number" && (
-                      <input
-                        type="number"
-                        className="admin-input no-icon"
-                        value={itemFormData[field.name] ?? 0}
-                        onChange={(e) => setItemFormData({ ...itemFormData, [field.name]: Number(e.target.value) })}
-                      />
-                    )}
-
-                    {/* Textarea */}
-                    {field.type === "textarea" && (
-                      <textarea
-                        className="admin-input no-icon"
-                        style={{ minHeight: "80px", resize: "vertical" }}
-                        value={itemFormData[field.name] || ""}
-                        onChange={(e) => setItemFormData({ ...itemFormData, [field.name]: e.target.value })}
-                      />
-                    )}
-
-                    {/* Tag Editor */}
-                    {field.type === "tags" && (
-                      <div className="admin-tag-editor">
-                        {(Array.isArray(itemFormData[field.name]) ? itemFormData[field.name] : []).map((t: string, idx: number) => (
-                          <span key={idx} className="admin-tag-chip">
-                            {t}
-                            <button
-                              type="button"
-                              className="admin-tag-chip-del"
-                              onClick={() => {
-                                const current = itemFormData[field.name] || [];
-                                setItemFormData({ ...itemFormData, [field.name]: current.filter((_: any, i: number) => i !== idx) });
-                              }}
-                            >
-                              ×
-                            </button>
-                          </span>
-                        ))}
-                        <input
-                          type="text"
-                          className="admin-tag-input"
-                          placeholder="Type & press Enter to add tag..."
-                          onKeyDown={(e) => {
-                            if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                              e.preventDefault();
-                              const val = e.currentTarget.value.trim();
-                              const current = Array.isArray(itemFormData[field.name]) ? itemFormData[field.name] : [];
-                              setItemFormData({ ...itemFormData, [field.name]: [...current, val] });
-                              e.currentTarget.value = "";
-                            }
-                          }}
-                        />
+                    <div className="admin-form-grid-2">
+                      <div className="admin-field-group">
+                        <label className="admin-field-label">
+                          <span>District</span>
+                          <small style={{ color: "var(--adm-text-faint)", fontWeight: 400 }}>Maharashtra district</small>
+                        </label>
+                        <select
+                          className="admin-input no-icon"
+                          value={itemFormData.district || "Pune"}
+                          onChange={(e) => setItemFormData({ ...itemFormData, district: e.target.value })}
+                          required
+                          style={{ height: "42px", cursor: "pointer" }}
+                        >
+                          {MAHARASHTRA_DISTRICTS.map((dist: string) => (
+                            <option key={dist} value={dist}>{dist}</option>
+                          ))}
+                        </select>
                       </div>
-                    )}
 
-                    {/* Image Upload Zone */}
-                    {field.type === "image" && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                      <div className="admin-field-group">
+                        <label className="admin-field-label">
+                          <span>City / Campus Area</span>
+                          <small style={{ color: "var(--adm-text-faint)", fontWeight: 400 }}>Locality e.g., Sangamner, Pune</small>
+                        </label>
                         <input
                           type="text"
                           className="admin-input no-icon"
-                          placeholder="Image URL (or select file below)"
+                          placeholder="e.g., Sangamner"
+                          value={itemFormData.city || ""}
+                          onChange={(e) => setItemFormData({ ...itemFormData, city: e.target.value })}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="admin-form-grid-2">
+                      <div className="admin-field-group">
+                        <label className="admin-field-label">
+                          <span>College Short Code <span style={{ fontWeight: 400, color: "var(--adm-text-muted)" }}>(Optional)</span></span>
+                          <small style={{ color: "var(--adm-text-faint)", fontWeight: 400 }}>Acronym e.g. AVCOE, PICT, COEP</small>
+                        </label>
+                        <input
+                          type="text"
+                          className="admin-input no-icon"
+                          placeholder="e.g., AVCOE (Optional)"
+                          value={itemFormData.code || ""}
+                          onChange={(e) => setItemFormData({ ...itemFormData, code: e.target.value })}
+                        />
+                      </div>
+
+                      <div className="admin-field-group">
+                        <label className="admin-field-label">
+                          <span>State</span>
+                          <small style={{ color: "var(--adm-text-faint)", fontWeight: 400 }}>Default: Maharashtra</small>
+                        </label>
+                        <input
+                          type="text"
+                          className="admin-input no-icon"
+                          value={itemFormData.state || "Maharashtra"}
+                          onChange={(e) => setItemFormData({ ...itemFormData, state: e.target.value })}
+                        />
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  (tableSchemas[editingTable]?.fields || []).map((field) => (
+                    <div key={field.name} className="admin-field-group">
+                      <label className="admin-field-label">
+                        <span>{field.label}</span>
+                        {field.hint && <small style={{ color: "var(--adm-text-faint)", fontWeight: 400 }}>{field.hint}</small>}
+                      </label>
+
+                      {/* Text Input */}
+                      {field.type === "text" && (
+                        <input
+                          type="text"
+                          className="admin-input no-icon"
+                          value={itemFormData[field.name] || ""}
+                          onChange={(e) => setItemFormData({ ...itemFormData, [field.name]: e.target.value })}
+                          required={field.name === "title" || field.name === "name"}
+                        />
+                      )}
+
+                      {/* Select Dropdown */}
+                      {field.type === "select" && (
+                        <select
+                          className="admin-input no-icon"
+                          value={itemFormData[field.name] || (field.options?.[0] || "")}
+                          onChange={(e) => setItemFormData({ ...itemFormData, [field.name]: e.target.value })}
+                          required={field.name === "district"}
+                          style={{ height: "42px", cursor: "pointer" }}
+                        >
+                          {(field.options || []).map((opt: string) => (
+                            <option key={opt} value={opt}>
+                              {opt}
+                            </option>
+                          ))}
+                        </select>
+                      )}
+
+                      {/* Number Input */}
+                      {field.type === "number" && (
+                        <input
+                          type="number"
+                          className="admin-input no-icon"
+                          value={itemFormData[field.name] ?? 0}
+                          onChange={(e) => setItemFormData({ ...itemFormData, [field.name]: Number(e.target.value) })}
+                        />
+                      )}
+
+                      {/* Textarea */}
+                      {field.type === "textarea" && (
+                        <textarea
+                          className="admin-input no-icon"
+                          style={{ minHeight: "80px", resize: "vertical" }}
                           value={itemFormData[field.name] || ""}
                           onChange={(e) => setItemFormData({ ...itemFormData, [field.name]: e.target.value })}
                         />
-                        <label className="admin-upload-zone">
-                          <Upload size={22} color="var(--adm-cyan)" />
-                          <span style={{ fontSize: "0.85rem", color: "var(--adm-text)" }}>Click or drop image to upload</span>
-                          <span style={{ fontSize: "0.72rem", color: "var(--adm-text-muted)" }}>Supports PNG, JPG, WebP under 6MB</span>
+                      )}
+
+                      {/* Tag Editor */}
+                      {field.type === "tags" && (
+                        <div className="admin-tag-editor">
+                          {(Array.isArray(itemFormData[field.name]) ? itemFormData[field.name] : []).map((t: string, idx: number) => (
+                            <span key={idx} className="admin-tag-chip">
+                              {t}
+                              <button
+                                type="button"
+                                className="admin-tag-chip-del"
+                                onClick={() => {
+                                  const current = itemFormData[field.name] || [];
+                                  setItemFormData({ ...itemFormData, [field.name]: current.filter((_: any, i: number) => i !== idx) });
+                                }}
+                              >
+                                ×
+                              </button>
+                            </span>
+                          ))}
                           <input
-                            type="file"
-                            accept="image/*"
-                            style={{ display: "none" }}
-                            onChange={(e) => {
-                              const f = e.target.files?.[0];
-                              if (f) handleUploadImage(f, field.name);
+                            type="text"
+                            className="admin-tag-input"
+                            placeholder="Type & press Enter to add tag..."
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                                e.preventDefault();
+                                const val = e.currentTarget.value.trim();
+                                const current = Array.isArray(itemFormData[field.name]) ? itemFormData[field.name] : [];
+                                setItemFormData({ ...itemFormData, [field.name]: [...current, val] });
+                                e.currentTarget.value = "";
+                              }
                             }}
                           />
-                        </label>
-                        {itemFormData[field.name] && (
-                          <img src={itemFormData[field.name]} alt="preview" className="admin-upload-preview" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                ))}
+                        </div>
+                      )}
+
+                      {/* Image Upload Zone */}
+                      {field.type === "image" && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+                          <input
+                            type="text"
+                            className="admin-input no-icon"
+                            placeholder="Image URL (or select file below)"
+                            value={itemFormData[field.name] || ""}
+                            onChange={(e) => setItemFormData({ ...itemFormData, [field.name]: e.target.value })}
+                          />
+                          <label className="admin-upload-zone">
+                            <Upload size={22} color="var(--adm-cyan)" />
+                            <span style={{ fontSize: "0.85rem", color: "var(--adm-text)" }}>Click or drop image to upload</span>
+                            <span style={{ fontSize: "0.72rem", color: "var(--adm-text-muted)" }}>Supports PNG, JPG, WebP under 6MB</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              style={{ display: "none" }}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) handleUploadImage(f, field.name);
+                              }}
+                            />
+                          </label>
+                          {itemFormData[field.name] && (
+                            <img src={itemFormData[field.name]} alt="preview" className="admin-upload-preview" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  ))
+                )}
               </div>
 
               <div className="admin-modal-footer">
@@ -5396,7 +5549,7 @@ export default function Admin() {
           ========================================================================== */}
       {showSubAdminModal && (
         <div className="admin-modal-backdrop" onClick={() => setShowSubAdminModal(false)}>
-          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="admin-modal wide" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header">
               <h2>Create Sub-Admin Account</h2>
               <button className="admin-modal-close-btn" onClick={() => setShowSubAdminModal(false)}>
@@ -5430,51 +5583,59 @@ export default function Admin() {
               }}
             >
               <div className="admin-modal-body">
-                <div className="admin-field-group">
-                  <label className="admin-field-label">Username</label>
-                  <input
-                    type="text"
-                    className="admin-input no-icon"
-                    required
-                    value={subAdminForm.username}
-                    onChange={(e) => setSubAdminForm({ ...subAdminForm, username: e.target.value })}
-                  />
+                <div className="admin-form-grid-2">
+                  <div className="admin-field-group">
+                    <label className="admin-field-label">Username</label>
+                    <input
+                      type="text"
+                      className="admin-input no-icon"
+                      required
+                      placeholder="e.g. pune_coordinator"
+                      value={subAdminForm.username}
+                      onChange={(e) => setSubAdminForm({ ...subAdminForm, username: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="admin-field-group">
+                    <label className="admin-field-label">Email Address</label>
+                    <input
+                      type="email"
+                      className="admin-input no-icon"
+                      required
+                      placeholder="e.g. hr@kairoedge.com"
+                      value={subAdminForm.email}
+                      onChange={(e) => setSubAdminForm({ ...subAdminForm, email: e.target.value })}
+                    />
+                  </div>
                 </div>
 
-                <div className="admin-field-group">
-                  <label className="admin-field-label">Email Address</label>
-                  <input
-                    type="email"
-                    className="admin-input no-icon"
-                    required
-                    value={subAdminForm.email}
-                    onChange={(e) => setSubAdminForm({ ...subAdminForm, email: e.target.value })}
-                  />
-                </div>
+                <div className="admin-form-grid-2">
+                  <div className="admin-field-group">
+                    <label className="admin-field-label">Temporary Password</label>
+                    <input
+                      type="password"
+                      className="admin-input no-icon"
+                      required
+                      placeholder="Minimum 4 characters"
+                      value={subAdminForm.password}
+                      onChange={(e) => setSubAdminForm({ ...subAdminForm, password: e.target.value })}
+                    />
+                  </div>
 
-                <div className="admin-field-group">
-                  <label className="admin-field-label">Temporary Password</label>
-                  <input
-                    type="password"
-                    className="admin-input no-icon"
-                    required
-                    value={subAdminForm.password}
-                    onChange={(e) => setSubAdminForm({ ...subAdminForm, password: e.target.value })}
-                  />
-                </div>
-
-                <div className="admin-field-group">
-                  <label className="admin-field-label">Role Title</label>
-                  <select
-                    className="admin-input no-icon"
-                    value={subAdminForm.role}
-                    onChange={(e) => setSubAdminForm({ ...subAdminForm, role: e.target.value })}
-                  >
-                    <option value="Talent HR / Recruiter">Talent HR / Recruiter</option>
-                    <option value="Leads & Sales Lead">Leads & Sales Lead</option>
-                    <option value="Content Editor">Content Editor</option>
-                    <option value="Placement Coordinator">Placement Coordinator</option>
-                  </select>
+                  <div className="admin-field-group">
+                    <label className="admin-field-label">Role Title</label>
+                    <select
+                      className="admin-input no-icon"
+                      value={subAdminForm.role}
+                      onChange={(e) => setSubAdminForm({ ...subAdminForm, role: e.target.value })}
+                      style={{ height: "42px" }}
+                    >
+                      <option value="Talent HR / Recruiter">Talent HR / Recruiter</option>
+                      <option value="Leads & Sales Lead">Leads & Sales Lead</option>
+                      <option value="Content Editor">Content Editor</option>
+                      <option value="Placement Coordinator">Placement Coordinator</option>
+                    </select>
+                  </div>
                 </div>
 
                 <div className="admin-field-group">
@@ -5551,7 +5712,7 @@ export default function Admin() {
           ========================================================================== */}
       {editingSubAdmin && (
         <div className="admin-modal-backdrop" onClick={() => setEditingSubAdmin(null)}>
-          <div className="admin-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="admin-modal wide" onClick={(e) => e.stopPropagation()}>
             <div className="admin-modal-header">
               <h2>Edit Sub-Admin ({editingSubAdmin.username})</h2>
               <button className="admin-modal-close-btn" onClick={() => setEditingSubAdmin(null)}>
@@ -5561,51 +5722,69 @@ export default function Admin() {
 
             <form onSubmit={handleUpdateSubAdmin}>
               <div className="admin-modal-body">
-                <div className="admin-field-group">
-                  <label className="admin-field-label">Username</label>
-                  <input
-                    type="text"
-                    className="admin-input no-icon"
-                    required
-                    value={editingSubAdmin.username}
-                    disabled={editingSubAdmin.role === "superadmin" || editingSubAdmin.username === "admin"}
-                    onChange={(e) => setEditingSubAdmin({ ...editingSubAdmin, username: e.target.value })}
-                  />
-                  {(editingSubAdmin.role === "superadmin" || editingSubAdmin.username === "admin") && (
-                    <small style={{ color: "var(--adm-text-faint)", marginTop: "4px", display: "block" }}>
-                      Primary superadmin username is protected and cannot be modified.
-                    </small>
-                  )}
-                </div>
-
-                <div className="admin-field-group">
-                  <label className="admin-field-label">Email Address</label>
-                  <input
-                    type="email"
-                    className="admin-input no-icon"
-                    required
-                    value={editingSubAdmin.email}
-                    onChange={(e) => setEditingSubAdmin({ ...editingSubAdmin, email: e.target.value })}
-                  />
-                </div>
-
-                <div className="admin-field-group">
-                  <label className="admin-field-label">Assigned Role</label>
-                  <select
-                    className="admin-input no-icon"
-                    value={editingSubAdmin.role}
-                    disabled={editingSubAdmin.role === "superadmin" || editingSubAdmin.username === "admin"}
-                    onChange={(e) => setEditingSubAdmin({ ...editingSubAdmin, role: e.target.value })}
-                    style={{ height: "42px" }}
-                  >
+                <div className="admin-form-grid-2">
+                  <div className="admin-field-group">
+                    <label className="admin-field-label">Username</label>
+                    <input
+                      type="text"
+                      className="admin-input no-icon"
+                      required
+                      value={editingSubAdmin.username}
+                      disabled={editingSubAdmin.role === "superadmin" || editingSubAdmin.username === "admin"}
+                      onChange={(e) => setEditingSubAdmin({ ...editingSubAdmin, username: e.target.value })}
+                    />
                     {(editingSubAdmin.role === "superadmin" || editingSubAdmin.username === "admin") && (
-                      <option value="superadmin">Superadmin</option>
+                      <small style={{ color: "var(--adm-text-faint)", marginTop: "4px", display: "block" }}>
+                        Primary superadmin username is protected and cannot be modified.
+                      </small>
                     )}
-                    <option value="Talent HR / Recruiter">Talent HR / Recruiter</option>
-                    <option value="Leads & Sales Lead">Leads & Sales Lead</option>
-                    <option value="Content Editor">Content Editor</option>
-                    <option value="Placement Coordinator">Placement Coordinator</option>
-                  </select>
+                  </div>
+
+                  <div className="admin-field-group">
+                    <label className="admin-field-label">Email Address</label>
+                    <input
+                      type="email"
+                      className="admin-input no-icon"
+                      required
+                      value={editingSubAdmin.email}
+                      onChange={(e) => setEditingSubAdmin({ ...editingSubAdmin, email: e.target.value })}
+                    />
+                  </div>
+                </div>
+
+                <div className="admin-form-grid-2">
+                  <div className="admin-field-group">
+                    <label className="admin-field-label">Assigned Role</label>
+                    <select
+                      className="admin-input no-icon"
+                      value={editingSubAdmin.role}
+                      disabled={editingSubAdmin.role === "superadmin" || editingSubAdmin.username === "admin"}
+                      onChange={(e) => setEditingSubAdmin({ ...editingSubAdmin, role: e.target.value })}
+                      style={{ height: "42px" }}
+                    >
+                      {(editingSubAdmin.role === "superadmin" || editingSubAdmin.username === "admin") && (
+                        <option value="superadmin">Superadmin</option>
+                      )}
+                      <option value="Talent HR / Recruiter">Talent HR / Recruiter</option>
+                      <option value="Leads & Sales Lead">Leads & Sales Lead</option>
+                      <option value="Content Editor">Content Editor</option>
+                      <option value="Placement Coordinator">Placement Coordinator</option>
+                    </select>
+                  </div>
+
+                  <div className="admin-field-group">
+                    <label className="admin-field-label">
+                      <span>Change Password</span>
+                      <small style={{ color: "var(--adm-text-faint)", fontWeight: 400 }}>Leave empty to keep current</small>
+                    </label>
+                    <input
+                      type="password"
+                      className="admin-input no-icon"
+                      placeholder="Enter new password (min 4 chars)..."
+                      value={editSubAdminPassword}
+                      onChange={(e) => setEditSubAdminPassword(e.target.value)}
+                    />
+                  </div>
                 </div>
 
                 <div className="admin-field-group">
@@ -5661,20 +5840,6 @@ export default function Admin() {
                       );
                     })}
                   </div>
-                </div>
-
-                <div className="admin-field-group">
-                  <label className="admin-field-label">
-                    <span>Change Password</span>
-                    <small style={{ color: "var(--adm-text-faint)", fontWeight: 400 }}>Leave empty to keep existing password</small>
-                  </label>
-                  <input
-                    type="password"
-                    className="admin-input no-icon"
-                    placeholder="Enter new password (minimum 4 characters)..."
-                    value={editSubAdminPassword}
-                    onChange={(e) => setEditSubAdminPassword(e.target.value)}
-                  />
                 </div>
               </div>
 
