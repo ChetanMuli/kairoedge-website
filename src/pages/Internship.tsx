@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
+import { MapPin, Clock, Award, CheckCircle2, ArrowRight } from "lucide-react";
 import SEO from "../components/SEO";
 import InternshipApplicationModal from "../components/InternshipApplicationModal";
 import InternshipDetailsModal, { InternshipTrackItem } from "../components/InternshipDetailsModal";
@@ -139,32 +140,79 @@ export default function Internship() {
 
           <div className="tracks">
             {TRACKS.map((track) => (
-              <article key={track.id} className="card rv">
-                <div className="ic">
-                  {track.iconSvg}
+              <article key={track.id} className="card rv track-card">
+                {/* Header row: Track Badge + Hiring Status */}
+                <div className="role-top-row">
+                  <span className="role-cat-badge" style={{ color: "#0284c7", borderColor: "rgba(2, 132, 199, 0.3)", background: "rgba(2, 132, 199, 0.08)" }}>
+                    <span className="role-cat-dot" style={{ background: "#0284c7" }} />
+                    Industry Track
+                  </span>
+                  <span className="role-hiring-status">
+                    <span className="role-hiring-pulse" />
+                    Applications Open
+                  </span>
                 </div>
-                <h3>{track.title}</h3>
-                <p className="mut">{track.desc}</p>
-                <ul>
+
+                {/* Track Title */}
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", margin: "10px 0 6px" }}>
+                  <div className="ic" style={{ width: "42px", height: "42px", flexShrink: 0, margin: 0 }}>
+                    {track.iconSvg}
+                  </div>
+                  <h3 className="role-card-title" style={{ margin: 0 }}>{track.title}</h3>
+                </div>
+
+                {/* Metadata Chips */}
+                <div className="role-meta-chips" style={{ marginTop: "10px" }}>
+                  <span className="role-meta-chip">
+                    <MapPin size={13} className="role-meta-icon" />
+                    Pune &amp; Ahilyanagar
+                  </span>
+                  <span className="role-meta-chip">
+                    <Clock size={13} className="role-meta-icon" />
+                    {track.duration || "3 - 6 Months"}
+                  </span>
+                  <span className="role-meta-chip">
+                    <Award size={13} className="role-meta-icon" />
+                    Certificate + PPO
+                  </span>
+                </div>
+
+                <p className="role-card-desc">{track.desc}</p>
+
+                {/* Highlights Box */}
+                <div className="role-card-highlights">
+                  <div className="role-highlight-item">
+                    <CheckCircle2 size={13} className="role-highlight-check" />
+                    <span>Live client project deliverables with senior code reviews</span>
+                  </div>
+                  <div className="role-highlight-item">
+                    <CheckCircle2 size={13} className="role-highlight-check" />
+                    <span>Recommendation letter + full-time offer for top performers</span>
+                  </div>
+                </div>
+
+                {/* Skills Pills */}
+                <ul className="role-skills-pills">
                   {track.skills.map((skill) => (
                     <li key={skill}>{skill}</li>
                   ))}
                 </ul>
-                <div className="track-card-footer">
+
+                <div className="card-btn-group" style={{ marginTop: "auto", paddingTop: "16px" }}>
+                  <button
+                    type="button"
+                    className="btn-card-secondary"
+                    onClick={() => handleOpenTrackDetails(track)}
+                  >
+                    View Curriculum
+                  </button>
                   <button
                     type="button"
                     className="btn-card-primary"
                     onClick={() => handleOpenInternModal(track.title)}
                   >
                     <span>Apply for track</span>
-                    <span aria-hidden="true">&rarr;</span>
-                  </button>
-                  <button
-                    type="button"
-                    className="btn-card-secondary"
-                    onClick={() => handleOpenTrackDetails(track)}
-                  >
-                    View Details
+                    <ArrowRight size={14} style={{ marginLeft: "4px" }} />
                   </button>
                 </div>
               </article>

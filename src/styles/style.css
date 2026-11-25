@@ -362,15 +362,14 @@ header.sc{background:color-mix(in srgb,var(--bg) 90%,transparent);box-shadow:0 1
 .card .lk span{transition:transform .25s}
 .card:hover .lk{color:var(--acc)}.card:hover .lk span{transform:translateX(5px)}
 /* internship */
-.tracks{display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.tracks{display:grid;grid-template-columns:repeat(2,1fr);gap:24px}
 .tracks .card{padding:28px}
 .ben{flex-direction:row;align-items:center;gap:48px;margin-top:20px;padding:36px 40px;background:linear-gradient(120deg,color-mix(in srgb,var(--blue) 16%,var(--card)),var(--card))}
 .ben .bl{flex:0 0 330px;display:flex;flex-direction:column;gap:16px;align-items:flex-start}
 .ben h3{margin:0;font-size:1.6rem}
 .ben .ck{display:grid!important;grid-template-columns:1fr 1fr;gap:16px 32px!important;margin:0!important;padding:0!important}
-@media(max-width:1060px){.tracks{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:768px){.tracks{grid-template-columns:1fr;gap:18px}}
 @media(max-width:900px){.ben{flex-direction:column;align-items:stretch;gap:26px;padding:30px}.ben .bl{flex:none}.ben .ck{grid-template-columns:1fr}}
-@media(max-width:640px){.tracks{grid-template-columns:1fr}}
 /* contact */
 .cg{align-items:start}
 .cform{display:grid;gap:18px;padding:36px}

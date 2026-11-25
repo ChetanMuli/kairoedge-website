@@ -1053,7 +1053,15 @@ export default function Admin() {
         },
         body: JSON.stringify(updatedCopy)
       });
-      if (!res.ok) throw new Error("Failed to save contact settings.");
+      if (!res.ok) {
+        if (res.status === 401) {
+          setToken("");
+          localStorage.removeItem(TOKEN_KEY);
+          throw new Error("Your admin session expired. Please sign in again.");
+        }
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || `Failed to save contact settings (Status ${res.status}).`);
+      }
 
       setContent((prev: any) => ({ ...prev, copy: updatedCopy }));
       await refreshSite();
