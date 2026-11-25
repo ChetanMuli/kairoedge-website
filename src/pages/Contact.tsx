@@ -141,6 +141,14 @@ export default function Contact() {
         }
       }
     }
+
+    // Smooth scroll to inquiry form if hash is present
+    if (window.location.hash === "#f" || window.location.hash === "#contact") {
+      setTimeout(() => {
+        const formEl = document.getElementById("f") || document.getElementById("contact");
+        formEl?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
   }, [searchParams]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {

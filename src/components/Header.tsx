@@ -12,12 +12,21 @@ export default function Header() {
     setMenuOpen(false);
   }, [location.pathname]);
 
+  // Lock body scroll when mobile menu is open to prevent jitter and accidental closing
+  useEffect(() => {
+    if (menuOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [menuOpen]);
+
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 8);
-      if (menuOpen && window.scrollY > 50) {
-        setMenuOpen(false);
-      }
     };
 
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -30,22 +39,23 @@ export default function Header() {
       window.removeEventListener("scroll", handleScroll);
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [menuOpen]);
+  }, []);
 
   const closeMenu = () => setMenuOpen(false);
 
   const handleLetsTalkClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     closeMenu();
-    if (location.pathname === "/") {
-      e.preventDefault();
-      const contactEl = document.getElementById("contact");
-      if (contactEl) {
-        contactEl.scrollIntoView({ behavior: "smooth" });
-        window.history.pushState(null, "", "#contact");
-        return;
-      }
+    if (location.pathname === "/contact") {
+      const formEl = document.getElementById("f") || document.getElementById("contact");
+      formEl?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      navigate("/contact#f");
+      setTimeout(() => {
+        const formEl = document.getElementById("f") || document.getElementById("contact");
+        formEl?.scrollIntoView({ behavior: "smooth" });
+      }, 150);
     }
-    navigate("/contact");
   };
 
   return (

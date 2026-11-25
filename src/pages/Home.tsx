@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { Sparkles } from "lucide-react";
 import SEO from "../components/SEO";
 import NetworkCanvas from "../components/NetworkCanvas";
 import HeroCard from "../components/HeroCard";
@@ -127,9 +128,15 @@ export default function Home() {
         <div className="edge" />
         <div className="wrap">
           <div className="hl">
-            <div className="hero-badge">
-              <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
-              <span>IT COMPANY · PUNE (HQ) &amp; AHILYANAGAR, MH</span>
+            <div className="hero-kicker-group">
+              <div className="hero-badge">
+                <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
+                <span>IT COMPANY · PUNE (HQ) &amp; AHILYANAGAR</span>
+              </div>
+              <div className="hero-tagline-badge">
+                <Sparkles size={12} className="hero-tagline-icon" />
+                <span>Your Business, Our Technology</span>
+              </div>
             </div>
             <h1>
               <span><i>Build the</i></span>
@@ -137,12 +144,12 @@ export default function Home() {
               <span><i>right on time.</i></span>
             </h1>
             <p className="lead">
-              KairoEdge Technologies Pvt. Ltd. is an enterprise IT company headquartered in Pune with a regional branch in Ahilyanagar, Maharashtra. We design, build and run cloud platforms, custom software, web &amp; mobile apps, and AI automation that help growing businesses accelerate digital transformation.
+              <strong style={{ color: "var(--ink)", fontWeight: 700 }}>Your Business, Our Technology.</strong> KairoEdge Technologies Pvt. Ltd. is an enterprise IT company headquartered in Pune with a regional branch in Ahilyanagar, Maharashtra. We design, build and run cloud platforms, custom software, web &amp; mobile apps, and AI automation that help growing businesses accelerate digital transformation.
             </p>
             <div className="cta">
-              <a className="btn pri" href="#contact" onClick={(e) => scrollToSection(e, "contact")}>
-                Book a free consultation
-              </a>
+              <Link className="btn pri" to="/contact">
+                Book a consultation
+              </Link>
               <a className="btn" href="#services" onClick={(e) => scrollToSection(e, "services")}>
                 See what we build
               </a>

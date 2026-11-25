@@ -63,6 +63,24 @@ const USER_KEY = "kairo-admin-user";
 const ROLE_KEY = "kairo-admin-role";
 const PERMS_KEY = "kairo-admin-perms";
 
+// API Base URL (defaults to relative /api, or custom VITE_API_URL if configured)
+const API_BASE = (import.meta.env.VITE_API_URL || "").replace(/\/+$/, "");
+
+/** Safely parse response JSON, throwing clear diagnostics if server returns HTML error pages */
+async function safeJson(res: Response) {
+  const text = await res.text();
+  try {
+    return JSON.parse(text);
+  } catch {
+    if (text.trim().startsWith("<")) {
+      throw new Error(
+        "Server API is unreachable or returned HTML. Please ensure backend Node.js (port 4001) is running on your server and Nginx/Apache reverse proxies /api requests to http://127.0.0.1:4001."
+      );
+    }
+    throw new Error(text || `Request failed with HTTP status ${res.status}`);
+  }
+}
+
 // Export helpers
 function exportToCsv(filename: string, columns: { header: string; accessor: (row: any) => any }[], rows: any[]) {
   const escapeCsv = (val: any) => {
@@ -614,12 +632,12 @@ export default function Admin() {
     setIsLoggingIn(true);
     setLoginError("");
     try {
-      const res = await fetch("/api/admin/login", {
+      const res = await fetch(`${API_BASE}/api/admin/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username: u, password: p })
       });
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!res.ok) throw new Error(data.error || "Login failed.");
 
       localStorage.setItem(TOKEN_KEY, data.token);
@@ -658,8 +676,8 @@ export default function Admin() {
     try {
       const headers = { Authorization: `Bearer ${token}` };
       const [dashRes, contentRes] = await Promise.all([
-        fetch("/api/admin/dashboard", { headers }),
-        fetch("/api/admin/content", { headers })
+        fetch(`${API_BASE}/api/admin/dashboard`, { headers }),
+        fetch(`${API_BASE}/api/admin/content`, { headers })
       ]);
 
       if (dashRes.status === 401 || contentRes.status === 401) {
@@ -668,11 +686,11 @@ export default function Admin() {
       }
 
       if (dashRes.ok) {
-        const d = await dashRes.json();
+        const d = await safeJson(dashRes);
         setDashboard(d);
       }
       if (contentRes.ok) {
-        const c = await contentRes.json();
+        const c = await safeJson(contentRes);
         setContent(c);
         if (c.copy) {
           setCopyData(mergeCopy(pageCopy, c.copy));
