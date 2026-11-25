@@ -2162,7 +2162,9 @@
   }
   .admin-toolbar-left {
     width: 100%;
+    display: flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 8px;
   }
   .admin-search-wrap {
@@ -2172,12 +2174,21 @@
   }
   .admin-filter-select,
   .admin-toolbar-left select {
-    flex: 1 1 135px !important;
-    min-width: 135px !important;
+    flex: 1 1 auto !important;
+    min-width: 130px !important;
     max-width: 100% !important;
   }
   .admin-filter-reset-btn {
     flex: 0 0 auto !important;
+  }
+  .admin-toolbar-right {
+    width: 100%;
+    margin-left: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 6px;
+    border-top: 1px dashed var(--adm-border);
   }
   .admin-candidate-header {
     flex-direction: column;
