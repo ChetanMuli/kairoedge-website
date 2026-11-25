@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
+import { MapPin, Briefcase, ArrowRight } from "lucide-react";
 import SEO from "../components/SEO";
 import JobApplicationModal from "../components/JobApplicationModal";
 import JobDetailsModal, { JobDetailItem } from "../components/JobDetailsModal";
@@ -339,40 +340,47 @@ export default function Careers() {
                 data-c={role.category}
                 style={{ ["--ac" as any]: role.color }}
               >
-                <div className="rt">
+                <div className="rt" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "14px" }}>
                   <div className="ic">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                       <path d={role.iconPath} />
                     </svg>
                   </div>
-                  <span className="bd">{role.categoryLabel}</span>
+                  <span className="bd" style={{ textTransform: "uppercase", fontSize: "0.72rem", fontWeight: 700, letterSpacing: "0.06em", padding: "4px 10px", borderRadius: "999px" }}>
+                    {role.categoryLabel}
+                  </span>
                 </div>
-                <h3>{role.title}</h3>
-                <p className="mut">{role.desc}</p>
+                <h3 style={{ fontSize: "1.25rem", fontWeight: 750, margin: "0 0 8px", color: "var(--ink)", letterSpacing: "-0.02em" }}>{role.title}</h3>
+                <p className="mut" style={{ fontSize: "0.92rem", lineHeight: 1.55, margin: "0 0 14px" }}>{role.desc}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: "12px", color: "var(--mut)", fontSize: "0.82rem", marginBottom: "12px", flexWrap: "wrap" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    <MapPin size={13} style={{ color: "var(--sun)" }} /> Pune (Hybrid)
+                  </span>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                    <Briefcase size={13} style={{ color: "var(--sun)" }} /> Full-time
+                  </span>
+                </div>
                 <ul>
                   {role.tags.map((tag) => (
                     <li key={tag}>{tag}</li>
                   ))}
                 </ul>
-                <div className="rf" style={{ flexDirection: "column", alignItems: "stretch", gap: "10px" }}>
-                  <span className="mut" style={{ fontSize: "0.85rem" }}>Full-time, Pune (hybrid)</span>
-                  <div className="card-btn-group">
-                    <button
-                      type="button"
-                      className="btn-card-secondary"
-                      onClick={() => handleOpenDetails(role)}
-                    >
-                      View Details
-                    </button>
-                    <button
-                      type="button"
-                      className="btn-card-primary"
-                      onClick={() => handleOpenApply(role.title)}
-                    >
-                      <span>Apply now</span>
-                      <span aria-hidden="true">&rarr;</span>
-                    </button>
-                  </div>
+                <div className="card-btn-group" style={{ marginTop: "18px" }}>
+                  <button
+                    type="button"
+                    className="btn-card-secondary"
+                    onClick={() => handleOpenDetails(role)}
+                  >
+                    View Details
+                  </button>
+                  <button
+                    type="button"
+                    className="btn-card-primary"
+                    onClick={() => handleOpenApply(role.title)}
+                  >
+                    <span>Apply now</span>
+                    <ArrowRight size={14} style={{ marginLeft: "4px" }} />
+                  </button>
                 </div>
               </article>
             ))}

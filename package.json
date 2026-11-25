@@ -8,6 +8,8 @@
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
     "server": "npm run dev --prefix server",
+    "server:install": "npm install --prefix server",
+    "server:start": "npm run start --prefix server",
     "db:setup": "npm run setup --prefix server"
   },
   "dependencies": {

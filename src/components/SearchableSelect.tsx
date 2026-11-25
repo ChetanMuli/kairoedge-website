@@ -42,13 +42,9 @@ export default function SearchableSelect({
     opt.label.toLowerCase().includes(query.toLowerCase())
   );
 
-  // Focus search input when dropdown opens
+  // Reset search query when dropdown closes without forcing mobile keyboard on open
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 50);
-    } else {
+    if (!isOpen) {
       setQuery("");
     }
   }, [isOpen]);

@@ -129,13 +129,10 @@ export default function Home() {
         <div className="wrap">
           <div className="hl">
             <div className="hero-kicker-group">
-              <div className="hero-badge">
-                <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
-                <span>IT COMPANY · PUNE (HQ) &amp; AHILYANAGAR</span>
-              </div>
               <div className="hero-tagline-badge">
-                <Sparkles size={12} className="hero-tagline-icon" />
-                <span>Your Business, Our Technology</span>
+                <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: "#22c55e", boxShadow: "0 0 8px #22c55e" }} />
+                <Sparkles size={13} className="hero-tagline-icon" />
+                <span>YOUR BUSINESS, OUR TECHNOLOGY</span>
               </div>
             </div>
             <h1>
@@ -144,7 +141,7 @@ export default function Home() {
               <span><i>right on time.</i></span>
             </h1>
             <p className="lead">
-              <strong style={{ color: "var(--ink)", fontWeight: 700 }}>Your Business, Our Technology.</strong> KairoEdge Technologies Pvt. Ltd. is an enterprise IT company headquartered in Pune with a regional branch in Ahilyanagar, Maharashtra. We design, build and run cloud platforms, custom software, web &amp; mobile apps, and AI automation that help growing businesses accelerate digital transformation.
+              We design, engineer, and run high-performance cloud platforms, custom enterprise software, mobile apps, and intelligent AI automation. Reliable delivery teams headquartered in Pune with regional operations in Ahilyanagar, Maharashtra.
             </p>
             <div className="cta">
               <Link className="btn pri" to="/contact">
