@@ -169,7 +169,19 @@ const contentTables = [
 
 async function main() {
   const { database, ...serverConfig } = dbConfig;
-  const connection = await mysql.createConnection(serverConfig);
+  let connection;
+  try {
+    connection = await mysql.createConnection(serverConfig);
+  } catch (err) {
+    if (err.code === "ER_ACCESS_DENIED_ERROR") {
+      console.error("\n❌ MySQL Access Denied for user '" + (serverConfig.user || "root") + "'.");
+      console.error("👉 To allow MySQL connection on Ubuntu in 5 seconds, run:");
+      console.error("   sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY ''; FLUSH PRIVILEGES;\"");
+      console.error("   OR if you have set a MySQL root password, create/update server/.env with:");
+      console.error("   DB_PASSWORD=your_mysql_password\n");
+    }
+    throw err;
+  }
   await connection.query(
     `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
   );
