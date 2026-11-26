@@ -986,6 +986,30 @@ export default function Admin() {
     }
   };
 
+  // Deduplicate Campus Colleges
+  const [deduplicatingColleges, setDeduplicatingColleges] = useState(false);
+  const handleDeduplicateColleges = async () => {
+    try {
+      setDeduplicatingColleges(true);
+      const res = await fetch("/api/admin/colleges/deduplicate", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) {
+        const errJson = await res.json().catch(() => ({}));
+        throw new Error(errJson.error || "Failed to deduplicate campus colleges.");
+      }
+      const data = await res.json();
+      setContent((prev: any) => ({ ...prev, colleges: data.colleges || [] }));
+      await refreshSite();
+      showToast(`Cleaned & deduplicated! Total unique colleges: ${data.count || data.colleges?.length || 0}`);
+    } catch (err: any) {
+      showToast(err.message, "error");
+    } finally {
+      setDeduplicatingColleges(false);
+    }
+  };
+
   // Toggle Sub-Admin Active
   const handleToggleSubAdmin = async (id: number, username: string) => {
     try {
@@ -4243,6 +4267,16 @@ export default function Admin() {
                     >
                       <Sparkles size={15} />
                       <span>{seedingColleges ? "Seeding Colleges..." : "⚡ Auto-Seed Maharashtra Colleges"}</span>
+                    </button>
+                    <button
+                      className="adm-btn adm-btn-sec"
+                      onClick={handleDeduplicateColleges}
+                      disabled={deduplicatingColleges}
+                      style={{ background: "rgba(16, 185, 129, 0.08)", borderColor: "rgba(16, 185, 129, 0.3)", color: "#059669", fontWeight: 700 }}
+                      title="Remove any duplicate college records and keep unique entries"
+                    >
+                      <CheckCircle2 size={15} />
+                      <span>{deduplicatingColleges ? "Cleaning..." : "🧹 Clean Duplicates"}</span>
                     </button>
                     <button className="adm-btn adm-btn-pri" onClick={() => handleOpenItemModal("colleges")}>
                       <Plus size={16} />

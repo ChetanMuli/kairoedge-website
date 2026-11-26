@@ -58,7 +58,26 @@ if [ -f server/src/seed_colleges_districtwise.sql ]; then
   echo "✓ District-wise Maharashtra colleges loaded into database."
 fi
 
-# 5. Build frontend production bundle
+# 5. Clean up any duplicate colleges from previous runs
+echo "Deduplicating colleges in MySQL..."
+sudo mysql kairoedge << 'DEDUP_EOF' 2>/dev/null || true
+DELETE c1 FROM colleges c1
+INNER JOIN colleges c2 
+WHERE c1.id > c2.id 
+  AND LOWER(TRIM(c1.name)) = LOWER(TRIM(c2.name));
+
+DELETE c1 FROM colleges c1
+INNER JOIN colleges c2 
+WHERE c1.id > c2.id 
+  AND c1.code IS NOT NULL 
+  AND c1.code != '' 
+  AND LOWER(TRIM(c1.code)) = LOWER(TRIM(c2.code));
+
+UPDATE colleges SET district = city WHERE (district IS NULL OR district = '') AND city IS NOT NULL;
+DEDUP_EOF
+echo "✓ Colleges deduplicated cleanly."
+
+# 6. Build frontend production bundle
 echo "Building frontend production bundle..."
 npm run build || true
 

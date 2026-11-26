@@ -302,7 +302,61 @@ export async function seedColleges() {
     } catch {}
   }
 
+  await deduplicateColleges().catch(() => {});
   return await query("SELECT * FROM colleges ORDER BY sort_order, name");
+}
+
+export async function deduplicateColleges() {
+  try {
+    // 1. Delete duplicate rows with identical trimmed lowercase name, keeping lowest id
+    await query(`
+      DELETE c1 FROM colleges c1
+      INNER JOIN colleges c2 
+      WHERE c1.id > c2.id 
+        AND LOWER(TRIM(c1.name)) = LOWER(TRIM(c2.name))
+    `).catch(() => {});
+
+    // 2. Delete duplicate rows with identical non-empty code, keeping lowest id
+    await query(`
+      DELETE c1 FROM colleges c1
+      INNER JOIN colleges c2 
+      WHERE c1.id > c2.id 
+        AND c1.code IS NOT NULL 
+        AND c1.code != '' 
+        AND LOWER(TRIM(c1.code)) = LOWER(TRIM(c2.code))
+    `).catch(() => {});
+
+    // 3. Remove known acronym aliases (e.g. COEP, PICT, VIT, MIT-WPU)
+    const acronyms = ["COEP", "PICT", "VIT", "MIT-WPU", "PCCOE", "CCOEW", "AIT", "DYPCOE", "VIIT", "SCOE", "SIT", "VJTI", "SPIT"];
+    for (const acr of acronyms) {
+      const matches = await query(
+        "SELECT id FROM colleges WHERE name LIKE ? OR code = ? ORDER BY id ASC",
+        [`%(${acr}%`, acr]
+      ).catch(() => []);
+      if (matches && matches.length > 1) {
+        const keepId = matches[0].id;
+        const removeIds = matches.slice(1).map(m => m.id);
+        if (removeIds.length) {
+          await query(`DELETE FROM colleges WHERE id IN (${removeIds.join(",")})`).catch(() => {});
+        }
+      }
+    }
+
+    // 4. Fill missing districts from city
+    await query("UPDATE colleges SET district = city WHERE (district IS NULL OR district = '') AND city IS NOT NULL").catch(() => {});
+
+    // 5. Ensure UNIQUE index on name so future duplicates cannot be inserted
+    const indexes = await query("SHOW INDEX FROM colleges WHERE Key_name = 'uq_college_name'").catch(() => []);
+    if (!indexes || !indexes.length) {
+      await query("ALTER TABLE colleges ADD UNIQUE INDEX uq_college_name (name)").catch(() => {});
+    }
+
+    const remaining = await query("SELECT COUNT(*) AS total FROM colleges");
+    return Number(remaining[0]?.total || 0);
+  } catch (err) {
+    console.warn("Notice deduplicating colleges:", err.message);
+    return 0;
+  }
 }
 
 export async function ensureColleges() {
@@ -326,10 +380,14 @@ export async function ensureColleges() {
     await query("UPDATE colleges SET district = city WHERE (district IS NULL OR district = '') AND city IS NOT NULL").catch(() => {});
   } catch {}
 
+  // Run automatic deduplication
+  await deduplicateColleges().catch(() => {});
+
   try {
     const count = await query("SELECT COUNT(*) AS total FROM colleges");
     if (!Number(count[0]?.total) || Number(count[0]?.total) < 20) {
       await seedColleges().catch(() => {});
+      await deduplicateColleges().catch(() => {});
     }
   } catch {}
 }
@@ -787,6 +845,9 @@ export async function listContent(_req, res) {
   }
   if (!content.colleges || content.colleges.length === 0) {
     content.colleges = await seedColleges().catch(() => []);
+  } else if (content.colleges.length > 50) {
+    await deduplicateColleges().catch(() => {});
+    content.colleges = await query("SELECT * FROM colleges ORDER BY sort_order, name").catch(() => content.colleges);
   }
   content.copy = await readCopy();
   content.applications = await query(

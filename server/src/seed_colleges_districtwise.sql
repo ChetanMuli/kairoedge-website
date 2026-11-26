@@ -1,6 +1,6 @@
 -- ============================================================================
 -- KAIROEDGE TECHNOLOGIES - DISTRICT-WISE CAMPUS COLLEGES SEED SCRIPT (MAHARASHTRA)
--- Run this in MySQL: mysql -u <user> -p <db_name> < seed_colleges_districtwise.sql
+-- Run this in MySQL: sudo mysql kairoedge < seed_colleges_districtwise.sql
 -- ============================================================================
 
 CREATE TABLE IF NOT EXISTS colleges (
@@ -12,9 +12,22 @@ CREATE TABLE IF NOT EXISTS colleges (
   state VARCHAR(100) NULL,
   is_active TINYINT(1) DEFAULT 1,
   sort_order INT DEFAULT 0,
-  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  UNIQUE KEY uq_college_name (name)
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Ensure district column exists
+SET @col_exists = (SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'colleges' AND COLUMN_NAME = 'district');
+SET @sql = IF(@col_exists = 0, 'ALTER TABLE colleges ADD COLUMN district VARCHAR(100) NULL AFTER code', 'SELECT 1');
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+-- Clean duplicates first
+DELETE c1 FROM colleges c1
+INNER JOIN colleges c2 
+WHERE c1.id > c2.id AND LOWER(TRIM(c1.name)) = LOWER(TRIM(c2.name));
+
+DELETE c1 FROM colleges c1
+INNER JOIN colleges c2 
+WHERE c1.id > c2.id AND c1.code IS NOT NULL AND c1.code != '' AND LOWER(TRIM(c1.code)) = LOWER(TRIM(c2.code));
 
 -- Seed / Upsert District-Wise Colleges
 INSERT INTO colleges (name, code, district, city, state, is_active, sort_order) VALUES
@@ -96,3 +109,14 @@ ON DUPLICATE KEY UPDATE
   city = VALUES(city),
   state = VALUES(state),
   is_active = VALUES(is_active);
+
+-- Final deduplication cleanup
+DELETE c1 FROM colleges c1
+INNER JOIN colleges c2 
+WHERE c1.id > c2.id AND LOWER(TRIM(c1.name)) = LOWER(TRIM(c2.name));
+
+DELETE c1 FROM colleges c1
+INNER JOIN colleges c2 
+WHERE c1.id > c2.id AND c1.code IS NOT NULL AND c1.code != '' AND LOWER(TRIM(c1.code)) = LOWER(TRIM(c2.code));
+
+UPDATE colleges SET district = city WHERE (district IS NULL OR district = '') AND city IS NOT NULL;

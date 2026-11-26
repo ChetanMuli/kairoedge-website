@@ -9,6 +9,7 @@ import {
   createAdminInquiry,
   createItem,
   createSubAdmin,
+  deduplicateColleges,
   deleteApplication,
   deleteInquiry,
   deleteItem,
@@ -193,6 +194,15 @@ app.post("/api/admin/colleges/seed", requireAdmin, async (_req, res, next) => {
   try {
     const colleges = await seedColleges();
     res.json({ ok: true, count: colleges.length, colleges });
+  } catch (error) {
+    next(error);
+  }
+});
+app.post("/api/admin/colleges/deduplicate", requireAdmin, async (_req, res, next) => {
+  try {
+    const remaining = await deduplicateColleges();
+    const colleges = await query("SELECT * FROM colleges ORDER BY sort_order, name");
+    res.json({ ok: true, count: remaining, colleges });
   } catch (error) {
     next(error);
   }
