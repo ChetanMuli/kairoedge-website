@@ -1,3 +1,4 @@
+import fs from "fs";
 import mysql from "mysql2/promise";
 import {
   architecture,
@@ -173,14 +174,40 @@ async function main() {
   try {
     connection = await mysql.createConnection(serverConfig);
   } catch (err) {
-    if (err.code === "ER_ACCESS_DENIED_ERROR") {
-      console.error("\n❌ MySQL Access Denied for user '" + (serverConfig.user || "root") + "'.");
-      console.error("👉 To allow MySQL connection on Ubuntu in 5 seconds, run:");
-      console.error("   sudo mysql -e \"ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY ''; FLUSH PRIVILEGES;\"");
-      console.error("   OR if you have set a MySQL root password, create/update server/.env with:");
-      console.error("   DB_PASSWORD=your_mysql_password\n");
+    let fallbackSuccess = false;
+
+    // Fallback 1: Try Unix Domain Socket if running on Linux
+    if (fs.existsSync("/var/run/mysqld/mysqld.sock") && !serverConfig.socketPath) {
+      try {
+        const socketConfig = { ...serverConfig, host: undefined, port: undefined, socketPath: "/var/run/mysqld/mysqld.sock" };
+        connection = await mysql.createConnection(socketConfig);
+        fallbackSuccess = true;
+        console.log("✓ Connected to MySQL via Unix domain socket (/var/run/mysqld/mysqld.sock).");
+      } catch (socketErr) {
+        // Socket connection also failed
+      }
     }
-    throw err;
+
+    // Fallback 2: Try root user with empty password if configured user fails
+    if (!fallbackSuccess && err.code === "ER_ACCESS_DENIED_ERROR") {
+      try {
+        const rootConfig = { ...serverConfig, user: "root", password: "" };
+        connection = await mysql.createConnection(rootConfig);
+        fallbackSuccess = true;
+        console.log("✓ Connected to MySQL using root fallback.");
+      } catch (rootErr) {
+        // Root fallback failed
+      }
+    }
+
+    if (!fallbackSuccess) {
+      if (err.code === "ER_ACCESS_DENIED_ERROR") {
+        console.error("\n❌ MySQL Access Denied for user '" + (serverConfig.user || "root") + "'.");
+        console.error("👉 To automatically configure MySQL with full permissions on Ubuntu, run:");
+        console.error("   bash setup-db.sh\n");
+      }
+      throw err;
+    }
   }
   await connection.query(
     `CREATE DATABASE IF NOT EXISTS \`${database}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci`
