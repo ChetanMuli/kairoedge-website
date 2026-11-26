@@ -1253,7 +1253,8 @@ export default function Admin() {
 
   // Filtered Job Applications
   const jobApplications = useMemo(() => {
-    const all = (content.applications || []).filter((a: any) => a.kind === "job");
+    const raw = Array.isArray(content.applications) ? content.applications : [];
+    const all = raw.filter((a: any) => a.kind === "job");
     return all.filter((app: any) => {
       const matchesSearch =
         !searchQuery ||
@@ -1273,7 +1274,8 @@ export default function Admin() {
 
   // Filtered Internship Applications
   const internApplications = useMemo(() => {
-    const all = (content.applications || []).filter((a: any) => a.kind === "internship");
+    const raw = Array.isArray(content.applications) ? content.applications : [];
+    const all = raw.filter((a: any) => a.kind === "internship");
     return all.filter((app: any) => {
       const matchesSearch =
         !searchQuery ||
@@ -1301,7 +1303,7 @@ export default function Admin() {
 
   // Filtered Inquiries (Leads)
   const clientInquiries = useMemo(() => {
-    const all = content.inquiries || [];
+    const all = Array.isArray(content.inquiries) ? content.inquiries : [];
     return all.filter((inq: any) => {
       const matchesSearch =
         !searchQuery ||
@@ -1321,7 +1323,8 @@ export default function Admin() {
 
   // Distinct roles for filter dropdowns
   const distinctJobRoles = useMemo<string[]>(() => {
-    const roles: string[] = (content.applications || [])
+    const raw = Array.isArray(content.applications) ? content.applications : [];
+    const roles: string[] = raw
       .filter((a: any) => a.kind === "job")
       .map((a: any) => a.role_title)
       .filter(Boolean);
@@ -1329,7 +1332,8 @@ export default function Admin() {
   }, [content.applications]);
 
   const distinctInternTracks = useMemo<string[]>(() => {
-    const tracks: string[] = (content.applications || [])
+    const raw = Array.isArray(content.applications) ? content.applications : [];
+    const tracks: string[] = raw
       .filter((a: any) => a.kind === "internship")
       .map((a: any) => a.role_title)
       .filter(Boolean);
@@ -1337,11 +1341,13 @@ export default function Admin() {
   }, [content.applications]);
 
   const distinctInternColleges = useMemo<string[]>(() => {
-    const fromApps: string[] = (content.applications || [])
+    const rawApps = Array.isArray(content.applications) ? content.applications : [];
+    const fromApps: string[] = rawApps
       .filter((a: any) => a.kind === "internship")
       .map((a: any) => a.college)
       .filter(Boolean);
-    const fromCollegesTable: string[] = (content.colleges || [])
+    const rawColleges = Array.isArray(content.colleges) ? content.colleges : [];
+    const fromCollegesTable: string[] = rawColleges
       .map((c: any) => c.name)
       .filter(Boolean);
     return Array.from(new Set([...fromCollegesTable, ...fromApps])).sort();
@@ -1349,10 +1355,12 @@ export default function Admin() {
 
   const distinctInternDistricts = useMemo<string[]>(() => {
     const set = new Set<string>(MAHARASHTRA_DISTRICTS);
-    (content.applications || []).forEach((a: any) => {
+    const rawApps = Array.isArray(content.applications) ? content.applications : [];
+    rawApps.forEach((a: any) => {
       if (a.district) set.add(a.district);
     });
-    (content.colleges || []).forEach((c: any) => {
+    const rawColleges = Array.isArray(content.colleges) ? content.colleges : [];
+    rawColleges.forEach((c: any) => {
       if (c.district) set.add(c.district);
       if (c.city) set.add(c.city);
     });
@@ -1360,7 +1368,8 @@ export default function Admin() {
   }, [content.applications, content.colleges]);
 
   const distinctLeadServices = useMemo<string[]>(() => {
-    const services: string[] = (content.inquiries || [])
+    const rawInquiries = Array.isArray(content.inquiries) ? content.inquiries : [];
+    const services: string[] = rawInquiries
       .map((i: any) => i.service)
       .filter(Boolean);
     return Array.from(new Set(services));
@@ -1368,7 +1377,7 @@ export default function Admin() {
 
   // Distinct Districts from Colleges
   const distinctCollegeDistricts = useMemo<string[]>(() => {
-    const list = content.colleges || [];
+    const list = Array.isArray(content.colleges) ? content.colleges : [];
     const set = new Set<string>();
     list.forEach((c: any) => {
       const d = c.district || c.city;
@@ -1381,20 +1390,21 @@ export default function Admin() {
 
   // Filtered Campus Colleges
   const filteredColleges = useMemo(() => {
-    let list = content.colleges || [];
+    const list = Array.isArray(content.colleges) ? content.colleges : [];
+    let res = list;
     if (collegeCityFilter !== "all") {
-      list = list.filter(
+      res = res.filter(
         (c: any) =>
           (c.district || c.city || "Pune").toLowerCase() === collegeCityFilter.toLowerCase()
       );
     }
     if (collegeStatusFilter !== "all") {
       const wantActive = collegeStatusFilter === "active";
-      list = list.filter((c: any) => Boolean(c.is_active) === wantActive);
+      res = res.filter((c: any) => Boolean(c.is_active) === wantActive);
     }
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
-      list = list.filter((c: any) =>
+      res = res.filter((c: any) =>
         (c.name || "").toLowerCase().includes(q) ||
         (c.code || "").toLowerCase().includes(q) ||
         (c.district || "").toLowerCase().includes(q) ||
@@ -1402,15 +1412,17 @@ export default function Admin() {
         (c.state || "").toLowerCase().includes(q)
       );
     }
-    return list;
+    return res;
   }, [content.colleges, collegeCityFilter, collegeStatusFilter, searchQuery]);
 
   // Filtered Generic Content Items (Jobs, Services, Projects, Tech, etc.)
   const filteredGenericItems = useMemo(() => {
-    const list = content[activeSection] || [];
-    if (!genericSearchQuery.trim()) return list;
+    const raw = content[activeSection];
+    if (!Array.isArray(raw)) return [];
+    if (!genericSearchQuery.trim()) return raw;
     const q = genericSearchQuery.toLowerCase();
-    return list.filter((item: any) => {
+    return raw.filter((item: any) => {
+      if (!item || typeof item !== "object") return false;
       return Object.values(item).some((val) => {
         if (typeof val === "string") return val.toLowerCase().includes(q);
         if (typeof val === "number") return val.toString().includes(q);
@@ -1422,48 +1434,56 @@ export default function Admin() {
 
   // Filtered Sub-Admins
   const filteredSubadmins = useMemo(() => {
-    let list = content.subadmins || [];
+    const list = Array.isArray(content.subadmins) ? content.subadmins : [];
+    let res = list;
     if (subadminRoleFilter !== "all") {
-      list = list.filter((s: any) => (s.role || "").toLowerCase() === subadminRoleFilter.toLowerCase());
+      res = res.filter((s: any) => (s.role || "").toLowerCase() === subadminRoleFilter.toLowerCase());
     }
     if (subadminSearchQuery.trim()) {
       const q = subadminSearchQuery.toLowerCase();
-      list = list.filter((s: any) =>
+      res = res.filter((s: any) =>
         (s.username || "").toLowerCase().includes(q) ||
         (s.email || "").toLowerCase().includes(q) ||
         (s.role || "").toLowerCase().includes(q)
       );
     }
-    return list;
+    return res;
   }, [content.subadmins, subadminRoleFilter, subadminSearchQuery]);
 
   // Paginated Slices (PAGE_SIZE = 10)
   const paginatedInquiries = useMemo(() => {
-    return clientInquiries.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const list = Array.isArray(clientInquiries) ? clientInquiries : [];
+    return list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   }, [clientInquiries, currentPage]);
 
   const paginatedJobApps = useMemo(() => {
-    return jobApplications.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const list = Array.isArray(jobApplications) ? jobApplications : [];
+    return list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   }, [jobApplications, currentPage]);
 
   const paginatedInternApps = useMemo(() => {
-    return internApplications.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const list = Array.isArray(internApplications) ? internApplications : [];
+    return list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   }, [internApplications, currentPage]);
 
   const paginatedColleges = useMemo(() => {
-    return filteredColleges.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const list = Array.isArray(filteredColleges) ? filteredColleges : [];
+    return list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   }, [filteredColleges, currentPage]);
 
   const paginatedGenericItems = useMemo(() => {
-    return filteredGenericItems.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const list = Array.isArray(filteredGenericItems) ? filteredGenericItems : [];
+    return list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   }, [filteredGenericItems, currentPage]);
 
   const paginatedSubadmins = useMemo(() => {
-    return filteredSubadmins.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const list = Array.isArray(filteredSubadmins) ? filteredSubadmins : [];
+    return list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   }, [filteredSubadmins, currentPage]);
 
   const paginatedRecycleBin = useMemo(() => {
-    return (content.recycleBin || []).slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+    const list = Array.isArray(content.recycleBin) ? content.recycleBin : [];
+    return list.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
   }, [content.recycleBin, currentPage]);
 
   // If not logged in, render the login screen
@@ -3566,6 +3586,68 @@ export default function Admin() {
                             value={copyData.home?.aboutLead || ""}
                             onChange={(e) => setCopyData({ ...copyData, home: { ...copyData.home, aboutLead: e.target.value } })}
                           />
+                        </div>
+
+                        {/* Home Page Contact Section (Bottom of Home Page) */}
+                        <div style={{ marginTop: "12px", padding: "18px", background: "rgba(2, 132, 199, 0.05)", borderRadius: "10px", border: "1px solid rgba(2, 132, 199, 0.2)" }}>
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "14px", flexWrap: "wrap", gap: "8px" }}>
+                            <h3 style={{ margin: 0, fontSize: "0.96rem", fontWeight: 750, color: "var(--adm-text-bright)", display: "flex", alignItems: "center", gap: "8px" }}>
+                              <span>📞</span> Home Page Contact Section (Bottom of Page)
+                            </h3>
+                            <button
+                              type="button"
+                              onClick={() => setActiveSection("contact_info")}
+                              style={{ background: "none", border: "none", color: "var(--adm-cyan)", fontSize: "0.82rem", fontWeight: 700, cursor: "pointer", textDecoration: "underline" }}
+                            >
+                              Edit Phone, Email & Addresses in Contact Settings →
+                            </button>
+                          </div>
+
+                          <div className="admin-form-grid-2">
+                            <div className="admin-field-group">
+                              <label className="admin-field-label">Contact Section Title on Home</label>
+                              <input
+                                type="text"
+                                className="admin-input no-icon"
+                                placeholder="Let's talk about your project"
+                                value={copyData.home?.contactTitle || ""}
+                                onChange={(e) => setCopyData({ ...copyData, home: { ...copyData.home, contactTitle: e.target.value } })}
+                              />
+                            </div>
+                            <div className="admin-field-group">
+                              <label className="admin-field-label">Contact Section Subtitle / Lead on Home</label>
+                              <input
+                                type="text"
+                                className="admin-input no-icon"
+                                placeholder="Share a few details and an engineer will reply within two working days..."
+                                value={copyData.home?.contactLead || ""}
+                                onChange={(e) => setCopyData({ ...copyData, home: { ...copyData.home, contactLead: e.target.value } })}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="admin-form-grid-2" style={{ marginTop: "14px" }}>
+                            <div className="admin-field-group">
+                              <label className="admin-field-label">Office Location Display on Home</label>
+                              <input
+                                type="text"
+                                className="admin-input no-icon"
+                                placeholder="Pune (HQ) & Ahilyanagar (Branch), Maharashtra, India"
+                                value={copyData.home?.asidePlace || ""}
+                                onChange={(e) => setCopyData({ ...copyData, home: { ...copyData.home, asidePlace: e.target.value } })}
+                              />
+                            </div>
+                            <div className="admin-field-group">
+                              <label className="admin-field-label">Contact Email Display on Home</label>
+                              <input
+                                type="email"
+                                className="admin-input no-icon"
+                                placeholder="contact@kairoedge.com"
+                                value={copyData.home?.asideEmail || ""}
+                                onChange={(e) => setCopyData({ ...copyData, home: { ...copyData.home, asideEmail: e.target.value } })}
+                              />
+                            </div>
+                          </div>
                         </div>
                       </>
                     )}

@@ -23,6 +23,7 @@ const HOME_SERVICES = [
 export default function Home() {
   const site = useSite();
   const copy = useCopy("home");
+  const contactCopy = useCopy("contact");
 
   const serviceOptions = useMemo(() => {
     if (Array.isArray(site?.services) && site.services.length > 0) {
@@ -554,9 +555,9 @@ export default function Home() {
       <section className="contact" id="contact">
         <div className="wrap cg">
           <div className="cl rv">
-            <h2>Let's talk about your project</h2>
+            <h2>{copy?.contactTitle || "Let's talk about your project"}</h2>
             <p className="mut" style={{ margin: "20px 0 30px", maxWidth: "44ch" }}>
-              Share a few details and an engineer will reply within two working days. No sales pitch, just a practical plan.
+              {copy?.contactLead || "Share a few details and an engineer will reply within two working days. No sales pitch, just a practical plan."}
             </p>
 
             <div className="facts" id="facts">
@@ -568,7 +569,7 @@ export default function Home() {
                 </span>
                 <div>
                   <small>Office</small>
-                  <p>Pune, Maharashtra, India</p>
+                  <p>{contactCopy?.place || copy?.asidePlace || "Pune (HQ) & Ahilyanagar (Branch), Maharashtra, India"}</p>
                 </div>
               </div>
 
@@ -580,7 +581,7 @@ export default function Home() {
                 </span>
                 <div>
                   <small>Working hours</small>
-                  <p>Monday to Saturday, 10:00 to 19:00 IST</p>
+                  <p>{contactCopy?.hours || "Monday to Saturday, 10:00 to 19:00 IST"}</p>
                 </div>
               </div>
 
@@ -593,7 +594,9 @@ export default function Home() {
                 <div>
                   <small>Email</small>
                   <p>
-                    <a href="mailto:contact@kairoedge.com">contact@kairoedge.com</a>
+                    <a href={`mailto:${contactCopy?.email || copy?.asideEmail || "contact@kairoedge.com"}`}>
+                      {contactCopy?.email || copy?.asideEmail || "contact@kairoedge.com"}
+                    </a>
                   </p>
                 </div>
               </div>
@@ -607,7 +610,14 @@ export default function Home() {
                 <div>
                   <small>Phone</small>
                   <p>
-                    <a href="tel:+912012345678">+91 20 1234 5678</a>
+                    <a href={`tel:${(contactCopy?.phone || "+91 20 1234 5678").replace(/\s+/g, "")}`}>
+                      {contactCopy?.phone || "+91 20 1234 5678"}
+                    </a>
+                    {contactCopy?.altPhone && (
+                      <span style={{ display: "block", fontSize: "0.85rem", marginTop: "2px", opacity: 0.85 }}>
+                        <a href={`tel:${contactCopy.altPhone.replace(/\s+/g, "")}`}>{contactCopy.altPhone}</a>
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
