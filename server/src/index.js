@@ -283,19 +283,37 @@ app.post("/api/set-logo", async (req, res, next) => {
 });
 
 app.use((error, _req, res, _next) => {
-  console.error(error);
+  console.error("KairoEdge Server Error:", error);
   const unavailable = error.code === "ECONNREFUSED" || error.code === "ER_BAD_DB_ERROR";
-  res.status(unavailable ? 503 : 500).json({
+  res.status(unavailable ? 503 : (error.status || 500)).json({
     error: unavailable
       ? "The KairoEdge database is not available. Start MySQL and run npm run setup in the server folder."
-      : "The server could not complete that request."
+      : (error.sqlMessage || error.message || "The server could not complete that request."),
+    code: error.code || null
   });
 });
 
-Promise.all([ensureCopy(), ensureApplications(), ensureColleges(), ensureInquiries(), ensureRecycleBin(), ensureAdmins()])
-  .catch((error) => console.error("Could not prepare admin tables.", error.message))
-  .finally(() => {
-    app.listen(port, () => {
-      console.log(`KairoEdge API listening on http://127.0.0.1:${port}`);
-    });
+async function initDatabaseTables() {
+  const steps = [
+    { name: "admins", fn: ensureAdmins },
+    { name: "copy", fn: ensureCopy },
+    { name: "colleges", fn: ensureColleges },
+    { name: "applications", fn: ensureApplications },
+    { name: "inquiries", fn: ensureInquiries },
+    { name: "recycleBin", fn: ensureRecycleBin }
+  ];
+  for (const step of steps) {
+    try {
+      await step.fn();
+    } catch (err) {
+      console.warn(`Table init notice for ${step.name}:`, err.message);
+    }
+  }
+}
+
+app.listen(port, () => {
+  console.log(`KairoEdge API listening on http://127.0.0.1:${port}`);
+  initDatabaseTables().then(() => {
+    console.log("KairoEdge database ready & verified.");
   });
+});

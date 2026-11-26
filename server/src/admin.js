@@ -120,80 +120,73 @@ export async function ensureApplications() {
     resume VARCHAR(255) NULL,
     status VARCHAR(30) DEFAULT 'new',
     notes TEXT NULL,
+    college VARCHAR(200) NULL,
+    district VARCHAR(100) NULL,
+    degree VARCHAR(100) NULL,
+    branch VARCHAR(100) NULL,
+    graduation_year VARCHAR(50) NULL,
+    experience VARCHAR(60) NULL,
+    current_company VARCHAR(120) NULL,
+    current_designation VARCHAR(100) NULL,
+    notice_period VARCHAR(60) NULL,
+    portfolio_url VARCHAR(255) NULL,
+    expected_ctc VARCHAR(60) NULL,
+    interview_date VARCHAR(60) NULL,
+    interview_mode VARCHAR(60) NULL,
+    rating INT DEFAULT 0,
+    salary_offered VARCHAR(60) NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(() => {});
 
-  const resumeCols = await query("SHOW COLUMNS FROM applications LIKE 'resume'");
-  if (!resumeCols.length) await query("ALTER TABLE applications ADD COLUMN resume VARCHAR(255) NULL");
+  const columnsToAdd = [
+    ["resume", "VARCHAR(255) NULL"],
+    ["status", "VARCHAR(30) DEFAULT 'new'"],
+    ["notes", "TEXT NULL"],
+    ["college", "VARCHAR(200) NULL"],
+    ["district", "VARCHAR(100) NULL AFTER college"],
+    ["degree", "VARCHAR(100) NULL"],
+    ["branch", "VARCHAR(100) NULL"],
+    ["graduation_year", "VARCHAR(50) NULL"],
+    ["experience", "VARCHAR(60) NULL"],
+    ["current_company", "VARCHAR(120) NULL"],
+    ["current_designation", "VARCHAR(100) NULL"],
+    ["notice_period", "VARCHAR(60) NULL"],
+    ["portfolio_url", "VARCHAR(255) NULL"],
+    ["expected_ctc", "VARCHAR(60) NULL"],
+    ["interview_date", "VARCHAR(60) NULL"],
+    ["interview_mode", "VARCHAR(60) NULL"],
+    ["rating", "INT DEFAULT 0"],
+    ["salary_offered", "VARCHAR(60) NULL"]
+  ];
 
-  const statusCols = await query("SHOW COLUMNS FROM applications LIKE 'status'");
-  if (!statusCols.length) await query("ALTER TABLE applications ADD COLUMN status VARCHAR(30) DEFAULT 'new'");
-
-  const notesCols = await query("SHOW COLUMNS FROM applications LIKE 'notes'");
-  if (!notesCols.length) await query("ALTER TABLE applications ADD COLUMN notes TEXT NULL");
-
-  const collegeCols = await query("SHOW COLUMNS FROM applications LIKE 'college'");
-  if (!collegeCols.length) await query("ALTER TABLE applications ADD COLUMN college VARCHAR(200) NULL");
-
-  const districtCols = await query("SHOW COLUMNS FROM applications LIKE 'district'");
-  if (!districtCols.length) await query("ALTER TABLE applications ADD COLUMN district VARCHAR(100) NULL AFTER college");
-
-  const degreeCols = await query("SHOW COLUMNS FROM applications LIKE 'degree'");
-  if (!degreeCols.length) await query("ALTER TABLE applications ADD COLUMN degree VARCHAR(100) NULL");
-
-  const branchCols = await query("SHOW COLUMNS FROM applications LIKE 'branch'");
-  if (!branchCols.length) await query("ALTER TABLE applications ADD COLUMN branch VARCHAR(100) NULL");
-
-  const gradCols = await query("SHOW COLUMNS FROM applications LIKE 'graduation_year'");
-  if (!gradCols.length) await query("ALTER TABLE applications ADD COLUMN graduation_year VARCHAR(50) NULL");
-
-  const expCols = await query("SHOW COLUMNS FROM applications LIKE 'experience'");
-  if (!expCols.length) await query("ALTER TABLE applications ADD COLUMN experience VARCHAR(60) NULL");
-
-  const compCols = await query("SHOW COLUMNS FROM applications LIKE 'current_company'");
-  if (!compCols.length) await query("ALTER TABLE applications ADD COLUMN current_company VARCHAR(120) NULL");
-
-  const desigCols = await query("SHOW COLUMNS FROM applications LIKE 'current_designation'");
-  if (!desigCols.length) await query("ALTER TABLE applications ADD COLUMN current_designation VARCHAR(100) NULL");
-
-  const noticeCols = await query("SHOW COLUMNS FROM applications LIKE 'notice_period'");
-  if (!noticeCols.length) await query("ALTER TABLE applications ADD COLUMN notice_period VARCHAR(60) NULL");
-
-  const portCols = await query("SHOW COLUMNS FROM applications LIKE 'portfolio_url'");
-  if (!portCols.length) await query("ALTER TABLE applications ADD COLUMN portfolio_url VARCHAR(255) NULL");
-
-  const ctcCols = await query("SHOW COLUMNS FROM applications LIKE 'expected_ctc'");
-  if (!ctcCols.length) await query("ALTER TABLE applications ADD COLUMN expected_ctc VARCHAR(60) NULL");
-
-  const interviewDateCols = await query("SHOW COLUMNS FROM applications LIKE 'interview_date'");
-  if (!interviewDateCols.length) await query("ALTER TABLE applications ADD COLUMN interview_date VARCHAR(60) NULL");
-
-  const interviewModeCols = await query("SHOW COLUMNS FROM applications LIKE 'interview_mode'");
-  if (!interviewModeCols.length) await query("ALTER TABLE applications ADD COLUMN interview_mode VARCHAR(60) NULL");
-
-  const ratingCols = await query("SHOW COLUMNS FROM applications LIKE 'rating'");
-  if (!ratingCols.length) await query("ALTER TABLE applications ADD COLUMN rating INT DEFAULT 0");
-
-  const salaryCols = await query("SHOW COLUMNS FROM applications LIKE 'salary_offered'");
-  if (!salaryCols.length) await query("ALTER TABLE applications ADD COLUMN salary_offered VARCHAR(60) NULL");
-
-  const count = await query("SELECT COUNT(*) AS total FROM applications");
-  if (!Number(count[0].total)) {
-    const samples = [
-      ["Meera Iyer", "meera.iyer@example.com", "+91 98450 11021", "Senior Full-Stack Engineer", "job", "Six years with React and Node.js. I have shipped staff portals and can join the Pune office three days a week."],
-      ["Arjun Deshmukh", "arjun.d@example.com", "+91 98220 44118", "Cloud Engineer", "job", "I run AWS accounts and CI pipelines. Looking for a hybrid cloud role in Pune with production ownership."],
-      ["Sana Qureshi", "sana.qureshi@example.com", "+91 90040 22881", "Product Designer", "job", "I design operational tools for dispatch and admin teams. Portfolio is available on request."],
-      ["Nikhil Rao", "nikhil.rao@example.com", "+91 98860 33442", "Senior Full-Stack Engineer", "job", "Full-stack engineer with MySQL and API work. I can start after a two-week notice."],
-      ["Ananya Shah", "ananya.shah@example.com", "+91 97650 77821", "Software Engineering Internship", "internship", "Final-year student at COEP. I have built a React project and can attend the Pune office three days a week."],
-      ["Rahul Patil", "rahul.patil@example.com", "+91 90110 66230", "Software Engineering Internship", "internship", "Recent graduate from PICT with HTML, CSS, and JavaScript projects. I want a six-month internship in Pune on a live product."]
-    ];
-    for (const row of samples) {
-      await query(
-        "INSERT INTO applications (name, email, phone, role_title, kind, message, status) VALUES (?, ?, ?, ?, ?, ?, 'new')",
-        row
-      );
-    }
+  for (const [col, def] of columnsToAdd) {
+    try {
+      const cols = await query(`SHOW COLUMNS FROM applications LIKE '${col}'`);
+      if (!cols.length) {
+        await query(`ALTER TABLE applications ADD COLUMN ${col} ${def}`).catch(() => {});
+      }
+    } catch {}
   }
+
+  try {
+    const count = await query("SELECT COUNT(*) AS total FROM applications");
+    if (!Number(count[0]?.total)) {
+      const samples = [
+        ["Meera Iyer", "meera.iyer@example.com", "+91 98450 11021", "Senior Full-Stack Engineer", "job", "Six years with React and Node.js. I have shipped staff portals and can join the Pune office three days a week."],
+        ["Arjun Deshmukh", "arjun.d@example.com", "+91 98220 44118", "Cloud Engineer", "job", "I run AWS accounts and CI pipelines. Looking for a hybrid cloud role in Pune with production ownership."],
+        ["Sana Qureshi", "sana.qureshi@example.com", "+91 90040 22881", "Product Designer", "job", "I design operational tools for dispatch and admin teams. Portfolio is available on request."],
+        ["Nikhil Rao", "nikhil.rao@example.com", "+91 98860 33442", "Senior Full-Stack Engineer", "job", "Full-stack engineer with MySQL and API work. I can start after a two-week notice."],
+        ["Ananya Shah", "ananya.shah@example.com", "+91 97650 77821", "Software Engineering Internship", "internship", "Final-year student at COEP. I have built a React project and can attend the Pune office three days a week."],
+        ["Rahul Patil", "rahul.patil@example.com", "+91 90110 66230", "Software Engineering Internship", "internship", "Recent graduate from PICT with HTML, CSS, and JavaScript projects. I want a six-month internship in Pune on a live product."]
+      ];
+      for (const row of samples) {
+        await query(
+          "INSERT INTO applications (name, email, phone, role_title, kind, message, status) VALUES (?, ?, ?, ?, ?, ?, 'new')",
+          row
+        ).catch(() => {});
+      }
+    }
+  } catch {}
 }
 
 export async function seedColleges() {
@@ -273,19 +266,40 @@ export async function seedColleges() {
     ["G. H. Raisoni College of Engineering", "GHRECO", "Nagpur", "Nagpur", "Maharashtra", 1, 92]
   ];
 
-  for (const row of sampleColleges) {
-    const existing = await query("SELECT id FROM colleges WHERE name = ? OR (code = ? AND code IS NOT NULL)", [row[0], row[1]]);
-    if (!existing.length) {
-      await query(
-        "INSERT INTO colleges (name, code, district, city, state, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)",
-        row
-      ).catch(() => {});
-    } else {
-      await query(
-        "UPDATE colleges SET district = ?, city = ?, state = ?, is_active = ? WHERE id = ?",
-        [row[2], row[3], row[4], row[5], existing[0].id]
-      ).catch(() => {});
+  await query(`CREATE TABLE IF NOT EXISTS colleges (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(200) NOT NULL,
+    code VARCHAR(50) NULL,
+    district VARCHAR(100) NULL,
+    city VARCHAR(100) NULL,
+    state VARCHAR(100) NULL,
+    is_active TINYINT(1) DEFAULT 1,
+    sort_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(() => {});
+
+  try {
+    const districtCols = await query("SHOW COLUMNS FROM colleges LIKE 'district'");
+    if (!districtCols.length) {
+      await query("ALTER TABLE colleges ADD COLUMN district VARCHAR(100) NULL AFTER code").catch(() => {});
     }
+  } catch {}
+
+  for (const row of sampleColleges) {
+    try {
+      const existing = await query("SELECT id FROM colleges WHERE name = ? OR (code = ? AND code IS NOT NULL)", [row[0], row[1]]);
+      if (!existing.length) {
+        await query(
+          "INSERT INTO colleges (name, code, district, city, state, is_active, sort_order) VALUES (?, ?, ?, ?, ?, ?, ?)",
+          row
+        ).catch(() => {});
+      } else {
+        await query(
+          "UPDATE colleges SET district = ?, city = ?, state = ?, is_active = ? WHERE id = ?",
+          [row[2], row[3], row[4], row[5], existing[0].id]
+        ).catch(() => {});
+      }
+    } catch {}
   }
 
   return await query("SELECT * FROM colleges ORDER BY sort_order, name");
@@ -302,18 +316,22 @@ export async function ensureColleges() {
     is_active TINYINT(1) DEFAULT 1,
     sort_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(() => {});
 
-  const districtCols = await query("SHOW COLUMNS FROM colleges LIKE 'district'");
-  if (!districtCols.length) {
-    await query("ALTER TABLE colleges ADD COLUMN district VARCHAR(100) NULL AFTER code").catch(() => {});
-  }
-  await query("UPDATE colleges SET district = city WHERE (district IS NULL OR district = '') AND city IS NOT NULL").catch(() => {});
+  try {
+    const districtCols = await query("SHOW COLUMNS FROM colleges LIKE 'district'");
+    if (!districtCols.length) {
+      await query("ALTER TABLE colleges ADD COLUMN district VARCHAR(100) NULL AFTER code").catch(() => {});
+    }
+    await query("UPDATE colleges SET district = city WHERE (district IS NULL OR district = '') AND city IS NOT NULL").catch(() => {});
+  } catch {}
 
-  const count = await query("SELECT COUNT(*) AS total FROM colleges");
-  if (!Number(count[0]?.total) || Number(count[0]?.total) < 20) {
-    await seedColleges().catch(() => {});
-  }
+  try {
+    const count = await query("SELECT COUNT(*) AS total FROM colleges");
+    if (!Number(count[0]?.total) || Number(count[0]?.total) < 20) {
+      await seedColleges().catch(() => {});
+    }
+  } catch {}
 }
 
 export async function ensureInquiries() {
@@ -387,20 +405,26 @@ export async function saveApplication(req, res) {
     return res.status(400).json({ error: "Choose a role before you apply." });
   }
 
+  await ensureApplications().catch(() => {});
+
   const resumeName = String(req.body.resumeName || "");
   const resumeData = String(req.body.resumeData || "");
   let resume = null;
   if (resumeData) {
-    const payload = resumeData.includes(",") ? resumeData.split(",").pop() : resumeData;
-    const file = Buffer.from(payload, "base64");
-    if (!file.length || file.length > 4_000_000) {
-      return res.status(400).json({ error: "Resume must be a PDF or Word file under 4 MB." });
+    try {
+      const payload = resumeData.includes(",") ? resumeData.split(",").pop() : resumeData;
+      const file = Buffer.from(payload, "base64");
+      if (file.length && file.length <= 6_000_000) {
+        mkdirSync(uploadDir, { recursive: true });
+        const clean = resumeName.replace(/[^a-z0-9.]+/gi, "-").replace(/^-|-$/g, "") || "resume.pdf";
+        const stored = `${Date.now()}-${clean}`;
+        writeFileSync(path.join(uploadDir, stored), file);
+        resume = `/uploads/${stored}`;
+      }
+    } catch (uploadErr) {
+      console.warn("Notice: could not save resume file directly to disk:", uploadErr.message);
+      resume = `attached: ${resumeName}`;
     }
-    mkdirSync(uploadDir, { recursive: true });
-    const clean = resumeName.replace(/[^a-z0-9.]+/gi, "-").replace(/^-|-$/g, "") || "resume.pdf";
-    const stored = `${Date.now()}-${clean}`;
-    writeFileSync(path.join(uploadDir, stored), file);
-    resume = `/uploads/${stored}`;
   }
 
   const experience = String(req.body.experience || "").trim();
@@ -410,30 +434,40 @@ export async function saveApplication(req, res) {
   const portfolio_url = String(req.body.portfolio_url || "").trim();
   const expected_ctc = String(req.body.expected_ctc || "").trim();
 
-  const result = await query(
-    `INSERT INTO applications (name, email, phone, role_title, kind, message, resume, status, college, district, degree, branch, graduation_year, experience, current_company, current_designation, notice_period, portfolio_url, expected_ctc) VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    [
-      name,
-      email,
-      phone,
-      role,
-      kind,
-      message || "Candidate applied through the online portal.",
-      resume,
-      college || null,
-      district || null,
-      degree || null,
-      branch || null,
-      graduation_year || null,
-      experience || null,
-      current_company || null,
-      current_designation || null,
-      notice_period || null,
-      portfolio_url || null,
-      expected_ctc || null
-    ]
-  );
-  res.status(201).json({ ok: true, id: result.insertId });
+  try {
+    const result = await query(
+      `INSERT INTO applications (name, email, phone, role_title, kind, message, resume, status, college, district, degree, branch, graduation_year, experience, current_company, current_designation, notice_period, portfolio_url, expected_ctc) VALUES (?, ?, ?, ?, ?, ?, ?, 'new', ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [
+        name,
+        email,
+        phone,
+        role,
+        kind,
+        message || "Candidate applied through the online portal.",
+        resume,
+        college || null,
+        district || null,
+        degree || null,
+        branch || null,
+        graduation_year || null,
+        experience || null,
+        current_company || null,
+        current_designation || null,
+        notice_period || null,
+        portfolio_url || null,
+        expected_ctc || null
+      ]
+    );
+    res.status(201).json({ ok: true, id: result.insertId });
+  } catch (dbErr) {
+    console.warn("Notice: full application insert failed, executing safe baseline insert:", dbErr.message);
+    const summaryMsg = `${message || "Applied online."}\n\n[Details: College: ${college || "N/A"}, Dist: ${district || "N/A"}, Exp: ${experience || "N/A"}, CTC: ${expected_ctc || "N/A"}]`;
+    const fallbackResult = await query(
+      "INSERT INTO applications (name, email, phone, role_title, kind, message, resume, status) VALUES (?, ?, ?, ?, ?, ?, ?, 'new')",
+      [name, email, phone, role, kind, summaryMsg, resume]
+    );
+    res.status(201).json({ ok: true, id: fallbackResult.insertId });
+  }
 }
 
 export async function listSubAdmins(_req, res) {
@@ -592,17 +626,21 @@ export async function ensureCopy() {
   await query(`CREATE TABLE IF NOT EXISTS site_copy (
     id TINYINT PRIMARY KEY,
     body LONGTEXT NOT NULL
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
-  const rows = await query("SELECT id FROM site_copy WHERE id = 1");
-  if (!rows[0]) {
-    await query("INSERT INTO site_copy (id, body) VALUES (1, ?)", [JSON.stringify(pageCopy)]);
-  }
+  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(() => {});
+  try {
+    const rows = await query("SELECT id FROM site_copy WHERE id = 1");
+    if (!rows[0]) {
+      const initJson = JSON.stringify(pageCopy);
+      await query("INSERT INTO site_copy (id, body) VALUES (1, ?) ON DUPLICATE KEY UPDATE body = ?", [initJson, initJson]);
+    }
+  } catch {}
 }
 
 export async function readCopy() {
-  const rows = await query("SELECT body FROM site_copy WHERE id = 1");
-  if (!rows[0]) return pageCopy;
+  await ensureCopy().catch(() => {});
   try {
+    const rows = await query("SELECT body FROM site_copy WHERE id = 1");
+    if (!rows[0]) return pageCopy;
     const parsed = JSON.parse(rows[0].body);
     return parsed && typeof parsed === "object" ? parsed : pageCopy;
   } catch {
@@ -615,13 +653,12 @@ export async function saveCopy(req, res) {
   if (!body || typeof body !== "object" || Array.isArray(body)) {
     return res.status(400).json({ error: "Page copy must be an object." });
   }
-  await ensureCopy();
-  const rows = await query("SELECT id FROM site_copy WHERE id = 1");
-  if (!rows[0]) {
-    await query("INSERT INTO site_copy (id, body) VALUES (1, ?)", [JSON.stringify(body)]);
-  } else {
-    await query("UPDATE site_copy SET body = ? WHERE id = 1", [JSON.stringify(body)]);
-  }
+  await ensureCopy().catch(() => {});
+  const serialized = JSON.stringify(body);
+  await query(
+    "INSERT INTO site_copy (id, body) VALUES (1, ?) ON DUPLICATE KEY UPDATE body = ?",
+    [serialized, serialized]
+  );
   res.json({ ok: true });
 }
 

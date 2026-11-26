@@ -3,3 +3,5 @@ server/node_modules
 dist
 server/.env
 *.log
+uploads/*
+!uploads/.gitkeep

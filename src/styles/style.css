@@ -106,10 +106,10 @@ section{padding:80px 0;scroll-margin-top:84px}
 @media(max-width:820px){.cg{grid-template-columns:1fr;gap:40px}}
 form{display:grid;gap:16px}
 label{display:grid;gap:6px;font-weight:500;font-size:.92rem}
-input,select,textarea{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:14px;width:100%;transition:border-color .2s,box-shadow .2s}
-input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sun);box-shadow:0 0 0 4px color-mix(in srgb,var(--sun) 25%,transparent)}
+input,select,textarea{font:inherit;color:#07152E;background:#FFFFFF;border:1px solid var(--line);border-radius:12px;padding:14px;width:100%;transition:border-color .2s,box-shadow .2s}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--sun);background:#FFFFFF;box-shadow:0 0 0 4px color-mix(in srgb,var(--sun) 25%,transparent)}
 
-/* Custom Autofill Styles (Fix white box on dark theme) */
+/* Custom Autofill Styles - Always crisp white background and clear readable dark navy text */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
@@ -122,12 +122,13 @@ select:-webkit-autofill,
 select:-webkit-autofill:hover,
 select:-webkit-autofill:focus,
 select:-webkit-autofill:active {
-  -webkit-text-fill-color: var(--ink) !important;
-  -webkit-box-shadow: 0 0 0 1000px #0E1538 inset !important;
-  box-shadow: 0 0 0 1000px #0E1538 inset !important;
-  background-color: #0E1538 !important;
+  -webkit-text-fill-color: #07152E !important;
+  -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+  box-shadow: 0 0 0 1000px #FFFFFF inset !important;
+  background-color: #FFFFFF !important;
+  color: #07152E !important;
   transition: background-color 5000s ease-in-out 0s !important;
-  caret-color: var(--ink) !important;
+  caret-color: #0062E6 !important;
 }
 
 :root[data-theme="light"] input:-webkit-autofill,
@@ -138,11 +139,11 @@ select:-webkit-autofill:active {
 :root[data-theme="light"] textarea:-webkit-autofill:hover,
 :root[data-theme="light"] textarea:-webkit-autofill:focus,
 :root[data-theme="light"] select:-webkit-autofill {
-  -webkit-text-fill-color: #101636 !important;
+  -webkit-text-fill-color: #07152E !important;
   -webkit-box-shadow: 0 0 0 1000px #FFFFFF inset !important;
   box-shadow: 0 0 0 1000px #FFFFFF inset !important;
   background-color: #FFFFFF !important;
-  caret-color: #101636 !important;
+  caret-color: #0062E6 !important;
 }
 
 .ok{display:none;padding:18px;border-radius:14px;border:1px solid var(--sun);color:var(--sun);font-weight:600}

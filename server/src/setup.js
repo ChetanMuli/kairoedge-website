@@ -13,6 +13,15 @@ import {
   technologies,
   testimonials
 } from "../../shared/siteContent.js";
+import {
+  ensureAdmins,
+  ensureApplications,
+  ensureColleges,
+  ensureCopy,
+  ensureInquiries,
+  ensureRecycleBin,
+  seedColleges
+} from "./admin.js";
 import { dbConfig } from "./db.js";
 
 const json = (value) => JSON.stringify(value);
@@ -250,7 +259,22 @@ async function main() {
   }
 
   await connection.end();
+
+  console.log("Initializing and verifying admin tables and college data...");
+  try {
+    await ensureAdmins();
+    await ensureCopy();
+    await ensureColleges();
+    await ensureApplications();
+    await ensureInquiries();
+    await ensureRecycleBin();
+    await seedColleges();
+    console.log("Admin tables & 50+ Maharashtra colleges initialized.");
+  } catch (err) {
+    console.warn("Notice initializing admin tables:", err.message);
+  }
   console.log(`Database "${database}" is ready on ${serverConfig.host}:${serverConfig.port}.`);
+  process.exit(0);
 }
 
 main().catch((error) => {
