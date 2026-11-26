@@ -1,9 +1,10 @@
 <!doctype html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="light">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0B1026" />
+    <meta name="color-scheme" content="light" />
+    <meta name="theme-color" content="#F4F8FD" />
     <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg" />
     <title>KairoEdge Technologies Pvt Ltd | Enterprise IT, Cloud &amp; Software | Pune (HQ) &amp; Ahilyanagar</title>
     <meta name="description" content="Enterprise IT company delivering cloud platforms, custom software, web &amp; mobile applications, and AI automation. Headquartered in Pune with a regional branch in Ahilyanagar, Maharashtra." />
@@ -16,15 +17,14 @@
       rel="stylesheet"
     />
 
-    <!-- Theme initialization script before first paint to prevent flash -->
+    <!-- Theme initialization script: Locked to crisp executive light theme -->
     <script>
       (function() {
         try {
-          var stored = localStorage.getItem('ke-theme');
-          var theme = stored ? stored : (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
-          document.documentElement.setAttribute('data-theme', theme);
+          localStorage.setItem('ke-theme', 'light');
+          document.documentElement.setAttribute('data-theme', 'light');
         } catch (e) {
-          document.documentElement.setAttribute('data-theme', 'dark');
+          document.documentElement.setAttribute('data-theme', 'light');
         }
       })();
     </script>

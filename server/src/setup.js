@@ -149,6 +149,12 @@ CREATE TABLE IF NOT EXISTS inquiries (
   phone VARCHAR(40) NULL,
   service VARCHAR(120) NULL,
   message TEXT NOT NULL,
+  status VARCHAR(30) DEFAULT 'new',
+  priority VARCHAR(20) DEFAULT 'medium',
+  notes TEXT NULL,
+  source VARCHAR(60) DEFAULT 'Website',
+  budget VARCHAR(80) NULL,
+  follow_up_date VARCHAR(40) NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 `;
@@ -176,28 +182,40 @@ async function main() {
   } catch (err) {
     let fallbackSuccess = false;
 
-    // Fallback 1: Try Unix Domain Socket if running on Linux
-    if (fs.existsSync("/var/run/mysqld/mysqld.sock") && !serverConfig.socketPath) {
+    // Fallback 1: Try 127.0.0.1 if host was localhost or undefined
+    try {
+      connection = await mysql.createConnection({ ...serverConfig, host: "127.0.0.1", socketPath: undefined });
+      fallbackSuccess = true;
+      console.log("✓ Connected to MySQL via 127.0.0.1.");
+    } catch {}
+
+    // Fallback 2: Try localhost if host was 127.0.0.1
+    if (!fallbackSuccess) {
+      try {
+        connection = await mysql.createConnection({ ...serverConfig, host: "localhost", socketPath: undefined });
+        fallbackSuccess = true;
+        console.log("✓ Connected to MySQL via localhost.");
+      } catch {}
+    }
+
+    // Fallback 3: Try Unix Domain Socket if running on Linux
+    if (!fallbackSuccess && fs.existsSync("/var/run/mysqld/mysqld.sock")) {
       try {
         const socketConfig = { ...serverConfig, host: undefined, port: undefined, socketPath: "/var/run/mysqld/mysqld.sock" };
         connection = await mysql.createConnection(socketConfig);
         fallbackSuccess = true;
         console.log("✓ Connected to MySQL via Unix domain socket (/var/run/mysqld/mysqld.sock).");
-      } catch (socketErr) {
-        // Socket connection also failed
-      }
+      } catch {}
     }
 
-    // Fallback 2: Try root user with empty password if configured user fails
-    if (!fallbackSuccess && err.code === "ER_ACCESS_DENIED_ERROR") {
+    // Fallback 4: Try root user with empty password
+    if (!fallbackSuccess) {
       try {
         const rootConfig = { ...serverConfig, user: "root", password: "" };
         connection = await mysql.createConnection(rootConfig);
         fallbackSuccess = true;
         console.log("✓ Connected to MySQL using root fallback.");
-      } catch (rootErr) {
-        // Root fallback failed
-      }
+      } catch {}
     }
 
     if (!fallbackSuccess) {

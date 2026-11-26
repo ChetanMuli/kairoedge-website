@@ -6,6 +6,7 @@ export interface InternshipTrackItem {
   title: string;
   desc: string;
   color?: string;
+  category?: string;
   categoryLabel?: string;
   skills: string[];
   duration?: string;

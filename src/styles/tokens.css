@@ -3,47 +3,9 @@
    ========================================================================== */
 
 :root,
+html,
+html[data-theme="light"],
 html[data-theme="dark"] {
-  --bg: #070e1c;
-  --bg2: #0d1a33;
-  --ink: #EEF4FF;
-  --mut: #94A8CB;
-  --line: rgba(56, 189, 248, 0.16);
-  --blue: #0070F3;
-  --cyan: #00D2FF;
-  --sun: #00B4D8;
-  --acc: #38BDF8;
-  --card: rgba(13, 26, 51, 0.65);
-  --on-sun: #ffffff;
-  --sh: 0 8px 32px rgba(0, 102, 255, 0.15);
-  --hg: 30%;
-  --hg2: 8%;
-  --glow-blend: screen;
-
-  /* Service Accents - aligned with logo */
-  --accent-cloud: #00D2FF;
-  --accent-software: #0066FF;
-  --accent-mobile: #06B6D4;
-  --accent-ai: #6366F1;
-  --accent-security: #0EA5E9;
-  --accent-design: #38BDF8;
-
-  /* Typography */
-  --font-heading: 'Bricolage Grotesque', sans-serif;
-  --font-body: 'Instrument Sans', sans-serif;
-
-  /* Dimensions */
-  --max-w: 1160px;
-  --pad-x: 24px;
-  --card-radius: 22px;
-  --btn-radius: 999px;
-  --section-pad: 88px;
-  --header-h: 68px;
-
-  color-scheme: dark;
-}
-
-html[data-theme="light"] {
   --bg: #F4F8FD;
   --bg2: #E8F2FC;
   --ink: #07152E;
@@ -68,7 +30,19 @@ html[data-theme="light"] {
   --accent-security: #0284C7;
   --accent-design: #0EA5E9;
 
-  color-scheme: light;
+  /* Typography */
+  --font-heading: 'Bricolage Grotesque', sans-serif;
+  --font-body: 'Instrument Sans', sans-serif;
+
+  /* Dimensions */
+  --max-w: 1160px;
+  --pad-x: 24px;
+  --card-radius: 22px;
+  --btn-radius: 999px;
+  --section-pad: 88px;
+  --header-h: 68px;
+
+  color-scheme: light !important;
 }
 
 /* ==========================================================================

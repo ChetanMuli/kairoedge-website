@@ -314,11 +314,12 @@ export default function Contact() {
           body: JSON.stringify(payload)
         });
 
-        if (res && res.ok) {
-          setSuccessMsg("Thanks. We have your message and will reply within two working days.");
-        } else {
-          setSuccessMsg("Thanks. We have your message and will reply within two working days.");
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+          throw new Error(data.error || "Failed to submit inquiry. Please try again.");
         }
+
+        setSuccessMsg("Thanks. We have your message and will reply within two working days.");
       }
 
       // Reset fields
@@ -728,7 +729,9 @@ export default function Contact() {
               >
                 <CheckCircle2 size={22} style={{ flexShrink: 0, marginTop: "2px" }} />
                 <div>
-                  <b style={{ display: "block", marginBottom: "4px" }}>Application Submitted Successfully</b>
+                  <b style={{ display: "block", marginBottom: "4px" }}>
+                    {isJob || isInternship ? "Application Submitted Successfully" : "Message Sent Successfully"}
+                  </b>
                   <span>{successMsg}</span>
                 </div>
               </div>

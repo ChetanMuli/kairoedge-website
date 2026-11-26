@@ -99,11 +99,15 @@ export default function Home() {
         message: contactMessage.trim() || `Consultation request for ${contactInterest}.`
       };
 
-      await fetch("/api/inquiries", {
+      const res = await fetch("/api/inquiries", {
         method: "POST",
         headers: { "Content-Type": "application/json", Accept: "application/json" },
         body: JSON.stringify(payload)
-      }).catch(() => null);
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to send message. Please try again.");
+      }
 
       setContactSuccess("Thanks. We have your message and will reply within two working days.");
       setContactName("");

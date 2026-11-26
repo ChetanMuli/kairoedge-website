@@ -217,8 +217,8 @@ app.post("/api/inquiries", async (req, res, next) => {
     const email = String(req.body.email || "").trim();
     const company = String(req.body.company || "").trim();
     const phone = String(req.body.phone || "").trim();
-    const service = String(req.body.service || "").trim();
-    const message = String(req.body.message || "").trim();
+    const service = String(req.body.service || req.body.interest || "General Inquiry").trim();
+    let message = String(req.body.message || "").trim();
 
     if (name.length < 2 || name.length > 80) {
       return res.status(400).json({ error: "Please enter your name." });
@@ -226,19 +226,31 @@ app.post("/api/inquiries", async (req, res, next) => {
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) || email.length > 160) {
       return res.status(400).json({ error: "Please enter a valid email address." });
     }
-    if (message.length < 12 || message.length > 2000) {
-      return res.status(400).json({ error: "Please describe the project in at least a sentence." });
+    if (!message || message.length < 3) {
+      message = `Inquiry regarding ${service} and technology requirements.`;
     }
     if (company.length > 120 || phone.length > 40 || service.length > 120) {
       return res.status(400).json({ error: "One of the fields is too long." });
     }
 
-    const result = await query(
-      `INSERT INTO inquiries (name, email, company, phone, service, message, status) VALUES (?, ?, ?, ?, ?, ?, 'new')`,
-      [name, email, company || null, phone || null, service || null, message]
-    );
-    res.status(201).json({ ok: true, id: result.insertId });
+    await ensureInquiries().catch(() => {});
+
+    try {
+      const result = await query(
+        `INSERT INTO inquiries (name, email, company, phone, service, message, status) VALUES (?, ?, ?, ?, ?, ?, 'new')`,
+        [name, email, company || null, phone || null, service || null, message]
+      );
+      return res.status(201).json({ ok: true, id: result.insertId });
+    } catch (insertErr) {
+      // Fallback if status column is absent in existing table
+      const fallbackResult = await query(
+        `INSERT INTO inquiries (name, email, company, phone, service, message) VALUES (?, ?, ?, ?, ?, ?)`,
+        [name, email, company || null, phone || null, service || null, message]
+      );
+      return res.status(201).json({ ok: true, id: fallbackResult.insertId });
+    }
   } catch (error) {
+    console.error("Error creating inquiry:", error);
     next(error);
   }
 });

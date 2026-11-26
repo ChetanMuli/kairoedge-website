@@ -6,42 +6,26 @@ echo "=== Configuring KairoEdge Database & Server ==="
 # 1. Cleanly recreate MySQL user 'kairoedge' and database 'kairoedge'
 echo "Configuring MySQL permissions..."
 configure_mysql() {
-  if sudo mysql << 'SQL_EOF' 2>/dev/null; then
-CREATE DATABASE IF NOT EXISTS kairoedge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-DROP USER IF EXISTS 'kairoedge'@'localhost';
-DROP USER IF EXISTS 'kairoedge'@'127.0.0.1';
-DROP USER IF EXISTS 'kairoedge'@'%';
-CREATE USER 'kairoedge'@'localhost' IDENTIFIED WITH mysql_native_password BY 'KairoEdge@2026';
-GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'localhost';
-CREATE USER 'kairoedge'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'KairoEdge@2026';
-GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'127.0.0.1';
-CREATE USER 'kairoedge'@'%' IDENTIFIED WITH mysql_native_password BY 'KairoEdge@2026';
-GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'%';
-FLUSH PRIVILEGES;
-SQL_EOF
-    return 0
-  fi
-
-  sudo mysql << 'FALLBACK_EOF'
+  sudo mysql << 'SQL_EOF' 2>/dev/null || sudo mysql
 CREATE DATABASE IF NOT EXISTS kairoedge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 DROP USER IF EXISTS 'kairoedge'@'localhost';
 DROP USER IF EXISTS 'kairoedge'@'127.0.0.1';
 DROP USER IF EXISTS 'kairoedge'@'%';
 CREATE USER 'kairoedge'@'localhost' IDENTIFIED BY 'KairoEdge@2026';
-GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'localhost';
 CREATE USER 'kairoedge'@'127.0.0.1' IDENTIFIED BY 'KairoEdge@2026';
-GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'127.0.0.1';
 CREATE USER 'kairoedge'@'%' IDENTIFIED BY 'KairoEdge@2026';
-GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'%';
+GRANT ALL PRIVILEGES ON *.* TO 'kairoedge'@'localhost' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'kairoedge'@'127.0.0.1' WITH GRANT OPTION;
+GRANT ALL PRIVILEGES ON *.* TO 'kairoedge'@'%' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
-FALLBACK_EOF
+SQL_EOF
+
+  # Support older MySQL 8.0 instances that use mysql_native_password
+  sudo mysql -e "ALTER USER 'kairoedge'@'localhost' IDENTIFIED WITH mysql_native_password BY 'KairoEdge@2026'; ALTER USER 'kairoedge'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'KairoEdge@2026'; FLUSH PRIVILEGES;" 2>/dev/null || true
+  sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY ''; FLUSH PRIVILEGES;" 2>/dev/null || true
 }
 
 configure_mysql
-
-# Ensure root also has empty password access as a fallback
-sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY ''; FLUSH PRIVILEGES;" 2>/dev/null || true
-
 echo "✓ MySQL database 'kairoedge' and user 'kairoedge' granted full permissions."
 
 # 2. Write both server/.env and root .env so configurations are 100% in sync
@@ -69,6 +53,10 @@ echo "✓ uploads directories ready with full permissions."
 # 4. Run database setup and auto-seed tables
 echo "Seeding database tables and Maharashtra colleges..."
 node server/src/setup.js
+if [ -f server/src/seed_colleges_districtwise.sql ]; then
+  sudo mysql kairoedge < server/src/seed_colleges_districtwise.sql 2>/dev/null || true
+  echo "✓ District-wise Maharashtra colleges loaded into database."
+fi
 
 # 5. Build frontend production bundle
 echo "Building frontend production bundle..."

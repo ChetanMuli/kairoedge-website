@@ -12,6 +12,7 @@ const TRACKS: (InternshipTrackItem & { iconSvg?: React.ReactNode })[] = [
     id: "cloud-devops",
     title: "Cloud & DevOps",
     color: "#0284c7",
+    category: "ai",
     categoryLabel: "Cloud & Infrastructure",
     desc: "Learn AWS, Linux, and automation by running real deployments and CI/CD pipelines.",
     skills: ["AWS", "Terraform", "Docker", "CI/CD"],
@@ -33,6 +34,7 @@ const TRACKS: (InternshipTrackItem & { iconSvg?: React.ReactNode })[] = [
     id: "full-stack",
     title: "Full-Stack Web Development",
     color: "#0d9488",
+    category: "eng",
     categoryLabel: "Web Engineering",
     desc: "Build modern web features end to end, from database to responsive client interface.",
     skills: ["React 19", "TypeScript", "Node.js", "MySQL"],
@@ -54,6 +56,7 @@ const TRACKS: (InternshipTrackItem & { iconSvg?: React.ReactNode })[] = [
     id: "mobile-apps",
     title: "Mobile App Development",
     color: "#8b5cf6",
+    category: "eng",
     categoryLabel: "Mobile Engineering",
     desc: "Ship Android and iOS screens with a single shared high-performance Flutter codebase.",
     skills: ["Flutter", "Dart", "REST APIs", "State Mgmt"],
@@ -75,6 +78,7 @@ const TRACKS: (InternshipTrackItem & { iconSvg?: React.ReactNode })[] = [
     id: "ai-data",
     title: "AI & Data Solutions",
     color: "#ec4899",
+    category: "ai",
     categoryLabel: "AI & Intelligence",
     desc: "Build generative AI integrations, automate data pipelines, and connect vector databases.",
     skills: ["Python", "Gemini API", "FastAPI", "Data Modeling"],
@@ -96,6 +100,7 @@ const TRACKS: (InternshipTrackItem & { iconSvg?: React.ReactNode })[] = [
     id: "uiux-design",
     title: "UI/UX & Product Design",
     color: "#f59e0b",
+    category: "des",
     categoryLabel: "Design & UX",
     desc: "Turn user research into wireframes, interactive prototypes, and design token systems.",
     skills: ["Figma", "Design Systems", "Prototyping", "WCAG AA"],
@@ -117,6 +122,7 @@ const TRACKS: (InternshipTrackItem & { iconSvg?: React.ReactNode })[] = [
     id: "backend-api",
     title: "Backend & Cloud Systems",
     color: "#10b981",
+    category: "eng",
     categoryLabel: "Backend Systems",
     desc: "Architect performant microservices, relational databases, caching, and secure authentication.",
     skills: ["Node.js", "MySQL", "Redis", "REST APIs"],
@@ -138,6 +144,7 @@ const TRACKS: (InternshipTrackItem & { iconSvg?: React.ReactNode })[] = [
 
 export default function Internship() {
   const copy = useCopy("internship");
+  const [filter, setFilter] = useState("all");
   const [isInternModalOpen, setIsInternModalOpen] = useState(false);
   const [selectedTrack, setSelectedTrack] = useState("Cloud & DevOps");
   const [selectedDetailsTrack, setSelectedDetailsTrack] = useState<InternshipTrackItem | null>(null);
@@ -152,6 +159,10 @@ export default function Internship() {
     setSelectedTrack(trackName);
     setIsInternModalOpen(true);
   };
+
+  const filteredTracks = TRACKS.filter(
+    (t) => filter === "all" || t.category === filter
+  );
 
   return (
     <>
@@ -182,10 +193,41 @@ export default function Internship() {
           <div className="head rv">
             <h2>{copy?.subheading || "Choose your track"}</h2>
             <p className="mut">{copy?.subtext || "Our internship is built for students and fresh graduates who want hands-on experience, not just certificates."}</p>
+
+            <div className="fl" role="group" aria-label="Filter tracks" style={{ marginTop: "24px" }}>
+              <button
+                type="button"
+                className={filter === "all" ? "on" : ""}
+                onClick={() => setFilter("all")}
+              >
+                All Tracks
+              </button>
+              <button
+                type="button"
+                className={filter === "eng" ? "on" : ""}
+                onClick={() => setFilter("eng")}
+              >
+                Engineering &amp; Web
+              </button>
+              <button
+                type="button"
+                className={filter === "ai" ? "on" : ""}
+                onClick={() => setFilter("ai")}
+              >
+                Cloud &amp; AI
+              </button>
+              <button
+                type="button"
+                className={filter === "des" ? "on" : ""}
+                onClick={() => setFilter("des")}
+              >
+                Product Design
+              </button>
+            </div>
           </div>
 
           <div className="roles rv">
-            {TRACKS.map((track) => (
+            {filteredTracks.map((track) => (
               <article
                 key={track.id}
                 className="role card"

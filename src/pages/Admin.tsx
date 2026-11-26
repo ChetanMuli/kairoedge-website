@@ -489,10 +489,22 @@ export default function Admin() {
       try {
         localStorage.setItem("kairoedge_admin_active_tab", activeSection);
         if (window.location.hash !== `#${activeSection}`) {
-          window.history.replaceState(null, "", `#${activeSection}`);
+          window.location.hash = activeSection;
         }
       } catch {}
     }
+  }, [activeSection]);
+
+  // Listen to hash changes (browser back/forward or direct navigation)
+  useEffect(() => {
+    const onHashChange = () => {
+      const h = window.location.hash.replace("#", "").trim();
+      if (h && h !== activeSection) {
+        setActiveSection(h);
+      }
+    };
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
   }, [activeSection]);
 
   // Live Data State
@@ -1875,16 +1887,20 @@ export default function Admin() {
                 <span className="admin-breadcrumb-root">Control Room</span>
                 <span className="admin-breadcrumb-sep">/</span>
                 <span className="admin-breadcrumb-active">
-                  {activeSection === "dashboard" && "Command Dashboard"}
-                  {activeSection === "inquiries" && "Client Leads & Inquiries"}
-                  {activeSection === "contact_info" && "Contact & Company Settings"}
-                  {activeSection === "job_apps" && "Job Applications Pipeline"}
-                  {activeSection === "intern_apps" && "Internship Candidates"}
-                  {activeSection === "colleges" && "Campus Colleges"}
-                  {activeSection === "copy" && "Page Copy & Content Editor"}
-                  {activeSection === "subadmins" && "Sub-Admins & Permissions"}
-                  {activeSection === "recycle_bin" && "Recycle Bin & Safety"}
-                  {tableSchemas[activeSection] && activeSection !== "colleges" && tableSchemas[activeSection].label}
+                  {(() => {
+                    switch (activeSection) {
+                      case "dashboard": return "Command Dashboard";
+                      case "inquiries": return "Client Leads & Inquiries";
+                      case "contact_info": return "Contact & Company Settings";
+                      case "job_apps": return "Job Applications Pipeline";
+                      case "intern_apps": return "Internship Candidates";
+                      case "colleges": return "Campus Colleges";
+                      case "copy": return "Page Copy & Content Editor";
+                      case "subadmins": return "Sub-Admins & Permissions";
+                      case "recycle_bin": return "Recycle Bin & Safety";
+                      default: return tableSchemas[activeSection]?.label || activeSection;
+                    }
+                  })()}
                 </span>
               </div>
             </div>
