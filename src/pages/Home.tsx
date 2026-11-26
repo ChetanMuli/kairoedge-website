@@ -659,37 +659,40 @@ export default function Home() {
               <label>
                 <span>Your name <b style={{ color: "var(--sun)" }}>*</b></span>
                 <input
-                  name="n"
+                  name="fullName"
                   required
                   autoComplete="name"
                   placeholder="e.g. Rahul Sharma"
                   value={contactName}
                   onChange={(e) => setContactName(e.target.value)}
+                  style={{ backgroundColor: "#FFFFFF", color: "#07152E", colorScheme: "light" }}
                 />
               </label>
               <label>
                 <span>Mobile number <b style={{ color: "var(--sun)" }}>*</b></span>
                 <input
-                  name="p"
+                  name="phoneNumber"
                   type="tel"
                   required
                   autoComplete="tel"
                   placeholder="+91 98765 43210"
                   value={contactPhone}
                   onChange={(e) => setContactPhone(e.target.value)}
+                  style={{ backgroundColor: "#FFFFFF", color: "#07152E", colorScheme: "light" }}
                 />
               </label>
             </div>
             <label>
               <span>Work email <b style={{ color: "var(--sun)" }}>*</b></span>
               <input
-                name="e"
+                name="emailAddress"
                 type="email"
                 required
                 autoComplete="email"
                 placeholder="name@company.com"
                 value={contactEmail}
                 onChange={(e) => setContactEmail(e.target.value)}
+                style={{ backgroundColor: "#FFFFFF", color: "#07152E", colorScheme: "light" }}
               />
             </label>
             <div>
@@ -711,6 +714,7 @@ export default function Home() {
                 placeholder="Tell us about your goals, timeline, or requirements..."
                 value={contactMessage}
                 onChange={(e) => setContactMessage(e.target.value)}
+                style={{ backgroundColor: "#FFFFFF", color: "#07152E", colorScheme: "light" }}
               />
             </label>
 

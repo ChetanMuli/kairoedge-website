@@ -484,23 +484,27 @@ export default function Contact() {
               <label>
                 <span>Full name <b style={{ color: "var(--sun)" }}>*</b></span>
                 <input
-                  name="n"
+                  name="fullName"
                   required
                   placeholder="Your full name"
                   autoComplete="name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  style={{ backgroundColor: "#FFFFFF", color: "#07152E", colorScheme: "light" }}
                 />
               </label>
 
               <label>
                 <span>Phone / Mobile Number <b style={{ color: "var(--sun)" }}>*</b></span>
                 <input
+                  name="phoneNumber"
                   type="tel"
                   required
                   placeholder="+91 98765 43210"
+                  autoComplete="tel"
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
+                  style={{ backgroundColor: "#FFFFFF", color: "#07152E", colorScheme: "light" }}
                 />
               </label>
             </div>
@@ -508,13 +512,14 @@ export default function Contact() {
             <label style={{ position: "relative", zIndex: 20 }}>
               <span>{isJob || isInternship ? "Email address" : "Work email"} <b style={{ color: "var(--sun)" }}>*</b></span>
               <input
-                name="e"
+                name="emailAddress"
                 type="email"
                 required
                 placeholder="name@example.com"
                 autoComplete="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                style={{ backgroundColor: "#FFFFFF", color: "#07152E", colorScheme: "light" }}
               />
             </label>
 
@@ -527,6 +532,7 @@ export default function Contact() {
                   placeholder="https://yourcompany.com or company name"
                   value={websiteUrl}
                   onChange={(e) => setWebsiteUrl(e.target.value)}
+                  style={{ backgroundColor: "#FFFFFF", color: "#07152E", colorScheme: "light" }}
                 />
               </label>
             )}
@@ -694,6 +700,7 @@ export default function Contact() {
                 }
                 value={message}
                 onChange={(e) => setMessage(e.target.value)}
+                style={{ backgroundColor: "#FFFFFF", color: "#07152E", colorScheme: "light" }}
               />
             </label>
 

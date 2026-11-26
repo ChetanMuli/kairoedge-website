@@ -218,6 +218,33 @@ async function main() {
       } catch {}
     }
 
+    // Fallback 5: Try root via Unix domain socket (Ubuntu standard auth_socket)
+    if (!fallbackSuccess && fs.existsSync("/var/run/mysqld/mysqld.sock")) {
+      try {
+        const rootSocketConfig = { user: "root", password: "", socketPath: "/var/run/mysqld/mysqld.sock" };
+        connection = await mysql.createConnection(rootSocketConfig);
+        fallbackSuccess = true;
+        console.log("✓ Connected to MySQL as root via Unix socket.");
+      } catch {}
+    }
+
+    if (fallbackSuccess) {
+      // Auto-configure kairoedge user permissions if we connected via root/fallback
+      try {
+        await connection.query("CREATE DATABASE IF NOT EXISTS kairoedge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
+        await connection.query("CREATE USER IF NOT EXISTS 'kairoedge'@'localhost' IDENTIFIED BY 'KairoEdge@2026'");
+        await connection.query("ALTER USER 'kairoedge'@'localhost' IDENTIFIED BY 'KairoEdge@2026'");
+        await connection.query("CREATE USER IF NOT EXISTS 'kairoedge'@'127.0.0.1' IDENTIFIED BY 'KairoEdge@2026'");
+        await connection.query("ALTER USER 'kairoedge'@'127.0.0.1' IDENTIFIED BY 'KairoEdge@2026'");
+        await connection.query("GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'localhost' WITH GRANT OPTION");
+        await connection.query("GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'127.0.0.1' WITH GRANT OPTION");
+        await connection.query("FLUSH PRIVILEGES");
+        console.log("✓ Verified and granted full permissions for 'kairoedge' user.");
+      } catch (userErr) {
+        // Non-fatal if root lacks grant or already granted
+      }
+    }
+
     if (!fallbackSuccess) {
       if (err.code === "ER_ACCESS_DENIED_ERROR") {
         console.error("\n❌ MySQL Access Denied for user '" + (serverConfig.user || "root") + "'.");

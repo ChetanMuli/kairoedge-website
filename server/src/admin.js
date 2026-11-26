@@ -681,24 +681,26 @@ export async function uploadMedia(req, res) {
 }
 
 export async function ensureCopy() {
-  await query(`CREATE TABLE IF NOT EXISTS site_copy (
-    id TINYINT PRIMARY KEY,
-    body LONGTEXT NOT NULL
-  ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`).catch(() => {});
   try {
+    await query(`CREATE TABLE IF NOT EXISTS site_copy (
+      id INT PRIMARY KEY,
+      body LONGTEXT NOT NULL
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`);
     const rows = await query("SELECT id FROM site_copy WHERE id = 1");
-    if (!rows[0]) {
+    if (!rows || rows.length === 0) {
       const initJson = JSON.stringify(pageCopy);
       await query("INSERT INTO site_copy (id, body) VALUES (1, ?) ON DUPLICATE KEY UPDATE body = ?", [initJson, initJson]);
     }
-  } catch {}
+  } catch (err) {
+    console.warn("[ensureCopy Warning]", err.message);
+  }
 }
 
 export async function readCopy() {
   await ensureCopy().catch(() => {});
   try {
     const rows = await query("SELECT body FROM site_copy WHERE id = 1");
-    if (!rows[0]) return pageCopy;
+    if (!rows || !rows[0]) return pageCopy;
     const parsed = JSON.parse(rows[0].body);
     return parsed && typeof parsed === "object" ? parsed : pageCopy;
   } catch {
@@ -713,11 +715,16 @@ export async function saveCopy(req, res) {
   }
   await ensureCopy().catch(() => {});
   const serialized = JSON.stringify(body);
-  await query(
-    "INSERT INTO site_copy (id, body) VALUES (1, ?) ON DUPLICATE KEY UPDATE body = ?",
-    [serialized, serialized]
-  );
-  res.json({ ok: true });
+  try {
+    await query(
+      "INSERT INTO site_copy (id, body) VALUES (1, ?) ON DUPLICATE KEY UPDATE body = ?",
+      [serialized, serialized]
+    );
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[saveCopy Error]", err);
+    res.status(500).json({ error: `Database error while saving site copy: ${err.message}` });
+  }
 }
 
 function pack(table, body) {

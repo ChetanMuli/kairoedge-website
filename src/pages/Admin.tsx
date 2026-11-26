@@ -1930,15 +1930,20 @@ export default function Admin() {
             </div>
 
             <div className="admin-topbar-right">
-              <button
-                className="adm-btn adm-btn-sec adm-btn-sm"
-                onClick={fetchData}
-                disabled={refreshing}
-                title="Refresh All Data"
+              <span className="admin-sync-indicator" title="Real-time database synchronization active">
+                <span className="admin-sync-dot" />
+                <span>Live Sync Active</span>
+              </span>
+              <a
+                href="/"
+                target="_blank"
+                rel="noreferrer"
+                className="admin-website-link"
+                title="Open live website in new tab"
               >
-                <RefreshCw size={14} className={refreshing ? "spin" : ""} />
-                <span>{refreshing ? "Refreshing..." : "Refresh"}</span>
-              </button>
+                <span>View Website</span>
+                <ExternalLink size={13} />
+              </a>
             </div>
           </header>
 
@@ -4258,26 +4263,6 @@ export default function Admin() {
                     <p>Manage partnering engineering colleges and institutes in Pune and Maharashtra for campus placements</p>
                   </div>
                   <div className="admin-view-actions">
-                    <button
-                      className="adm-btn adm-btn-sec"
-                      onClick={handleSeedColleges}
-                      disabled={seedingColleges}
-                      style={{ background: "rgba(14, 165, 233, 0.08)", borderColor: "rgba(14, 165, 233, 0.3)", color: "#0284c7", fontWeight: 700 }}
-                      title="Automatically populate 50+ top colleges across Maharashtra districts (Pune, Ahilyanagar, Mumbai, Nashik, Sambhajinagar, etc.)"
-                    >
-                      <Sparkles size={15} />
-                      <span>{seedingColleges ? "Seeding Colleges..." : "⚡ Auto-Seed Maharashtra Colleges"}</span>
-                    </button>
-                    <button
-                      className="adm-btn adm-btn-sec"
-                      onClick={handleDeduplicateColleges}
-                      disabled={deduplicatingColleges}
-                      style={{ background: "rgba(16, 185, 129, 0.08)", borderColor: "rgba(16, 185, 129, 0.3)", color: "#059669", fontWeight: 700 }}
-                      title="Remove any duplicate college records and keep unique entries"
-                    >
-                      <CheckCircle2 size={15} />
-                      <span>{deduplicatingColleges ? "Cleaning..." : "🧹 Clean Duplicates"}</span>
-                    </button>
                     <button className="adm-btn adm-btn-pri" onClick={() => handleOpenItemModal("colleges")}>
                       <Plus size={16} />
                       <span>Add Campus College</span>
@@ -4482,23 +4467,22 @@ export default function Admin() {
                                   <GraduationCap size={28} />
                                 </div>
                                 <div style={{ fontWeight: 700, fontSize: "1.05rem", color: "var(--adm-text-bright)" }}>
-                                  {(content.colleges || []).length === 0 ? "No campus colleges in database yet" : "No campus colleges match your filter"}
+                                  {(content.colleges || []).length === 0 ? "No campus colleges found" : "No campus colleges match your filter"}
                                 </div>
                                 <p style={{ color: "var(--adm-text-muted)", fontSize: "0.88rem", margin: 0, lineHeight: 1.5 }}>
                                   {(content.colleges || []).length === 0
-                                    ? "Populate 50+ top engineering colleges across Pune, Ahilyanagar, Mumbai, Nashik, Sambhajinagar, and Maharashtra with one click."
+                                    ? "Add partnering engineering colleges and institutes to populate the internship application form."
                                     : "Try clearing search keywords or district filters to view all colleges."}
                                 </p>
                                 {(content.colleges || []).length === 0 ? (
                                   <button
                                     type="button"
                                     className="adm-btn adm-btn-pri"
-                                    onClick={handleSeedColleges}
-                                    disabled={seedingColleges}
+                                    onClick={() => handleOpenItemModal("colleges")}
                                     style={{ marginTop: "6px" }}
                                   >
-                                    <Sparkles size={16} />
-                                    <span>{seedingColleges ? "Seeding Colleges..." : "⚡ Populate 50+ Maharashtra Colleges Now"}</span>
+                                    <Plus size={16} />
+                                    <span>Add First Campus College</span>
                                   </button>
                                 ) : (
                                   <button

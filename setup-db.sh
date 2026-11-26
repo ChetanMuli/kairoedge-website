@@ -3,26 +3,32 @@ set -e
 
 echo "=== Configuring KairoEdge Database & Server ==="
 
-# 1. Cleanly recreate MySQL user 'kairoedge' and database 'kairoedge'
+# 1. Cleanly configure MySQL user 'kairoedge' and database 'kairoedge'
 echo "Configuring MySQL permissions..."
 configure_mysql() {
-  sudo mysql << 'SQL_EOF' 2>/dev/null || sudo mysql
-CREATE DATABASE IF NOT EXISTS kairoedge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-DROP USER IF EXISTS 'kairoedge'@'localhost';
-DROP USER IF EXISTS 'kairoedge'@'127.0.0.1';
-DROP USER IF EXISTS 'kairoedge'@'%';
-CREATE USER 'kairoedge'@'localhost' IDENTIFIED BY 'KairoEdge@2026';
-CREATE USER 'kairoedge'@'127.0.0.1' IDENTIFIED BY 'KairoEdge@2026';
-CREATE USER 'kairoedge'@'%' IDENTIFIED BY 'KairoEdge@2026';
-GRANT ALL PRIVILEGES ON *.* TO 'kairoedge'@'localhost' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'kairoedge'@'127.0.0.1' WITH GRANT OPTION;
-GRANT ALL PRIVILEGES ON *.* TO 'kairoedge'@'%' WITH GRANT OPTION;
-FLUSH PRIVILEGES;
-SQL_EOF
+  # Create database
+  sudo mysql -e "CREATE DATABASE IF NOT EXISTS kairoedge CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
 
-  # Support older MySQL 8.0 instances that use mysql_native_password
-  sudo mysql -e "ALTER USER 'kairoedge'@'localhost' IDENTIFIED WITH mysql_native_password BY 'KairoEdge@2026'; ALTER USER 'kairoedge'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'KairoEdge@2026'; FLUSH PRIVILEGES;" 2>/dev/null || true
-  sudo mysql -e "ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY ''; FLUSH PRIVILEGES;" 2>/dev/null || true
+  # Create and alter user kairoedge with password for localhost, 127.0.0.1, and %
+  sudo mysql -e "
+    CREATE USER IF NOT EXISTS 'kairoedge'@'localhost' IDENTIFIED BY 'KairoEdge@2026';
+    ALTER USER 'kairoedge'@'localhost' IDENTIFIED BY 'KairoEdge@2026';
+    CREATE USER IF NOT EXISTS 'kairoedge'@'127.0.0.1' IDENTIFIED BY 'KairoEdge@2026';
+    ALTER USER 'kairoedge'@'127.0.0.1' IDENTIFIED BY 'KairoEdge@2026';
+    CREATE USER IF NOT EXISTS 'kairoedge'@'%' IDENTIFIED BY 'KairoEdge@2026';
+    ALTER USER 'kairoedge'@'%' IDENTIFIED BY 'KairoEdge@2026';
+    GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'localhost' WITH GRANT OPTION;
+    GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'127.0.0.1' WITH GRANT OPTION;
+    GRANT ALL PRIVILEGES ON kairoedge.* TO 'kairoedge'@'%' WITH GRANT OPTION;
+    FLUSH PRIVILEGES;
+  "
+
+  # Support legacy MySQL 8.0 instances that require mysql_native_password
+  sudo mysql -e "
+    ALTER USER 'kairoedge'@'localhost' IDENTIFIED WITH mysql_native_password BY 'KairoEdge@2026';
+    ALTER USER 'kairoedge'@'127.0.0.1' IDENTIFIED WITH mysql_native_password BY 'KairoEdge@2026';
+    FLUSH PRIVILEGES;
+  " 2>/dev/null || true
 }
 
 configure_mysql
